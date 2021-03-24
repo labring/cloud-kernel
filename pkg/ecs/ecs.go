@@ -4,9 +4,9 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/cuisongliu/cloud-kernel/pkg/exit"
-	"github.com/cuisongliu/cloud-kernel/pkg/logger"
-	"github.com/cuisongliu/cloud-kernel/pkg/vars"
+	"github.com/sealyun/cloud-kernel/pkg/exit"
+	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"strconv"
 	"sync"
 )
@@ -17,6 +17,7 @@ var aliyun *ecs.Client
 func getClient() *ecs.Client {
 	once.Do(func() {
 		var err error
+		vars.LoadVars()
 		aliyun, err = ecs.NewClientWithAccessKey("cn-hongkong", vars.AkId, vars.AkSK)
 		if err != nil {
 			exit.ProcessError(err)
@@ -35,13 +36,14 @@ func New(amount int, dryRun bool) []string {
 	request.InternetChargeType = "PayByTraffic"
 	request.InternetMaxBandwidthIn = "50"
 	request.InternetMaxBandwidthOut = "50"
-	request.KeyPairName = "release"
+	//request.KeyPairName = "release"
 	request.InstanceChargeType = "PostPaid"
 	request.SpotStrategy = "SpotAsPriceGo"
 	request.RegionId = "cn-hongkong"
 	request.SecurityGroupId = "sg-j6cb45dolegxcb32b47w"
 	request.VSwitchId = "vsw-j6cvaap9o5a7et8uumqyx"
 	request.ZoneId = "cn-hongkong-c"
+	request.Password = "Fanux#123"
 	request.ClientToken = utils.GetUUID()
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
 	response, err := client.RunInstances(request)
@@ -66,16 +68,9 @@ func Delete(dryRun bool, instanceId []string) {
 	logger.Info("删除成功: %s", response.RequestId)
 }
 
-func Describe(instanceId string) *ecs.DescribeInstanceAttributeResponse {
+func Describe(instanceId string) (*ecs.DescribeInstanceAttributeResponse, error) {
 	client := getClient()
 	request := ecs.CreateDescribeInstanceAttributeRequest()
 	request.InstanceId = instanceId
-	response, err := client.DescribeInstanceAttribute(request)
-	if err != nil {
-		exit.ProcessError(err)
-	}
-	if response.IsSuccess() {
-		return response
-	}
-	return nil
+	return client.DescribeInstanceAttribute(request)
 }

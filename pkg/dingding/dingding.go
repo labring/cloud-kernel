@@ -2,8 +2,8 @@ package dingding
 
 import (
 	"bytes"
-	"github.com/cuisongliu/cloud-kernel/pkg/httplib"
-	"github.com/cuisongliu/cloud-kernel/pkg/vars"
+	"github.com/sealyun/cloud-kernel/pkg/httplib"
+	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"io/ioutil"
 	"log"
 	"text/template"
@@ -33,6 +33,7 @@ const textBody = `{
 }`
 
 func DingdingText(text string, atAll bool) {
+	vars.LoadVars()
 	var envMap = make(map[string]interface{})
 	envMap["text"] = text
 	envMap["at_all"] = atAll
@@ -40,6 +41,7 @@ func DingdingText(text string, atAll bool) {
 }
 
 func DingdingLink(title, text, url string, atAll bool) {
+	vars.LoadVars()
 	var envMap = make(map[string]interface{})
 	envMap["title"] = title
 	envMap["text"] = text
@@ -63,7 +65,7 @@ func dingdingFromMap(data map[string]interface{}, text bool, token string) {
 		dd := buffer.String()
 		resp, _ := r.Body(dd).Header("Content-Type", "application/json").DoRequest()
 		result, _ := ioutil.ReadAll(resp.Body)
-		log.Println("DingDing: "+string(result))
+		log.Println("DingDing: " + string(result))
 	}
 
 }

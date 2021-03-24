@@ -2,7 +2,7 @@ package sshutil
 
 import (
 	"fmt"
-	"github.com/cuisongliu/cloud-kernel/pkg/logger"
+	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"os"
@@ -23,10 +23,10 @@ func (ss *SSH) connect(host string) (*ssh.Client, error) {
 		ss.Timeout = &DefaultTimeout
 	}
 	clientConfig := &ssh.ClientConfig{
-		User:    ss.User,
-		Auth:    auth,
-		Timeout: *ss.Timeout,
-		Config:  config,
+		User:            ss.User,
+		Auth:            auth,
+		Timeout:         *ss.Timeout,
+		Config:          config,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 

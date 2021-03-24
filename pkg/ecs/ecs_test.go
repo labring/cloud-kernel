@@ -1,12 +1,14 @@
 package ecs
 
 import (
-	"github.com/cuisongliu/cloud-kernel/pkg/vars"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	vars.AkId = ""
-	vars.AkSK = ""
-	New()
+	New(1, false)
+	//i-j6c0bltz93t1curhgrhs
+}
+
+func TestDelete(t *testing.T) {
+	Delete(false, []string{"i-j6c0bltz93t1curhgrhs"})
 }

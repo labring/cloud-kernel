@@ -8,4 +8,5 @@ type SSH struct {
 	PkFile     string
 	PkPassword string
 	Timeout    *time.Duration
+	Debug      bool
 }

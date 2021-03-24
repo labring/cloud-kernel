@@ -2,7 +2,7 @@ package filesize
 
 import (
 	"crypto/tls"
-	"github.com/cuisongliu/cloud-kernel/pkg/logger"
+	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"net/http"
 )
 
