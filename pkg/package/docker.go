@@ -1,6 +1,7 @@
 package _package
 
-var docker_shell = `yum install -y git conntrack && \
+//k8s docker docker k8s
+var dockerShell = `yum install -y git conntrack && \
 git clone https://github.com/sealyun/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/docker/* kube/ && \
 wget https://dl.k8s.io/v%s/kubernetes-server-linux-amd64.tar.gz && \

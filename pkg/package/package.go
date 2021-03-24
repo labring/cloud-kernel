@@ -51,7 +51,7 @@ func Package() {
 	k8s := "1.20.0"
 	docker := "19.03.12"
 	logger.Info("3. install k8s[ " + k8s + " ] : " + publicIP)
-	s.CmdAsync(publicIP, fmt.Sprintf(docker_shell, k8s, docker, docker, k8s))
+	s.CmdAsync(publicIP, fmt.Sprintf(dockerShell, k8s, docker, docker, k8s))
 	logger.Info("4. wait k8s[ " + k8s + " ] pull all images: " + publicIP)
 	retry.Do(func() error {
 		logger.Debug("4. retry wait k8s all pod is running :" + publicIP)
