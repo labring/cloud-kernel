@@ -18,7 +18,7 @@ type _package interface {
 	SavePackage() error
 }
 
-func Package(rt vars.Runtime, k8sVersion, runtimeVersion string) {
+func Package(k8sVersion, runtimeVersion string) {
 	instance := ecs.New(1, false, "", true)
 	logger.Info("1. begin create ecs")
 	var instanceInfo *aliyunEcs.DescribeInstanceAttributeResponse
@@ -65,10 +65,9 @@ func Package(rt vars.Runtime, k8sVersion, runtimeVersion string) {
 		return
 	}
 	var k8s _package
-	switch rt {
-	case vars.Docker:
-		k8s = NewDockerK8s(k8sVersion, runtimeVersion, publicIP)
-	case vars.Containerd:
+	if utils.For120(k8sVersion) {
+		k8s = NewContainerdK8s(k8sVersion, runtimeVersion, publicIP)
+	} else {
 		k8s = NewContainerdK8s(k8sVersion, runtimeVersion, publicIP)
 	}
 	if k8s == nil {
@@ -99,5 +98,6 @@ func Package(rt vars.Runtime, k8sVersion, runtimeVersion string) {
 		return
 	}
 	logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)
-	test(publicIP, k8sVersion)
+	//test(publicIP, k8sVersion)
+	upload(publicIP, k8sVersion)
 }

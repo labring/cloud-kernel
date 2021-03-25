@@ -1,16 +1,15 @@
 package _package
 
 import (
-	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"testing"
 )
 
 func TestPackageDocker(t *testing.T) {
-	Package(vars.Docker, "1.19.9", "")
+	Package("1.19.9", "")
 }
 
 func TestPackageContainerd(t *testing.T) {
-	Package(vars.Containerd, "1.20.0", "")
+	Package("1.20.0", "")
 }
 
 func TestSaveImage(t *testing.T) {

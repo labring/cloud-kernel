@@ -3,6 +3,7 @@ package dingding
 import (
 	"bytes"
 	"github.com/sealyun/cloud-kernel/pkg/httplib"
+	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"io/ioutil"
 	"log"
@@ -51,6 +52,10 @@ func DingdingLink(title, text, url string, atAll bool) {
 }
 
 func dingdingFromMap(data map[string]interface{}, text bool, token string) {
+	if token == "" {
+		logger.Warn("钉钉Token未配置,跳过通知")
+		return
+	}
 	r := httplib.Post("https://oapi.dingtalk.com/robot/send?access_token=" + token)
 	var templateContent string
 	if text {
