@@ -12,38 +12,47 @@ import (
 )
 
 var once sync.Once
-var aliyun *ecs.Client
+var hkCli *ecs.Client
 
 func getClient() *ecs.Client {
 	once.Do(func() {
 		var err error
 		vars.LoadVars()
-		aliyun, err = ecs.NewClientWithAccessKey("cn-hongkong", vars.AkId, vars.AkSK)
+		hkCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
 		if err != nil {
 			exit.ProcessError(err)
 		}
 	})
-	return aliyun
+	return hkCli
 }
 
-func New(amount int, dryRun bool) []string {
+func getRegion() map[string]*ecs.RunInstancesRequest {
+	region := make(map[string]*ecs.RunInstancesRequest)
+	hk := ecs.CreateRunInstancesRequest()
+	hk.ImageId = "centos_7_04_64_20G_alibase_201701015.vhd"
+	hk.InstanceType = "ecs.c5.xlarge"
+	hk.InternetChargeType = "PayByTraffic"
+	hk.InternetMaxBandwidthIn = "50"
+	hk.InternetMaxBandwidthOut = "50"
+	hk.InstanceChargeType = "PostPaid"
+	hk.SpotStrategy = "SpotAsPriceGo"
+	hk.RegionId = "cn-hongkong"
+	hk.SecurityGroupId = "sg-j6cb45dolegxcb32b47w"
+	hk.VSwitchId = "vsw-j6cvaap9o5a7et8uumqyx"
+	hk.ZoneId = "cn-hongkong-c"
+	hk.Password = vars.EcsPassword
+	region["cn-hongkong"] = hk
+	return region
+}
+
+func New(amount int, dryRun bool, region string) []string {
+	if region == "" {
+		region = "cn-hongkong"
+	}
 	client := getClient()
 	// 创建请求并设置参数
-	request := ecs.CreateRunInstancesRequest()
+	request := getRegion()[region]
 	request.Amount = requests.Integer(strconv.Itoa(amount))
-	request.ImageId = "centos_7_04_64_20G_alibase_201701015.vhd"
-	request.InstanceType = "ecs.c5.xlarge"
-	request.InternetChargeType = "PayByTraffic"
-	request.InternetMaxBandwidthIn = "50"
-	request.InternetMaxBandwidthOut = "50"
-	//request.KeyPairName = "release"
-	request.InstanceChargeType = "PostPaid"
-	request.SpotStrategy = "SpotAsPriceGo"
-	request.RegionId = "cn-hongkong"
-	request.SecurityGroupId = "sg-j6cb45dolegxcb32b47w"
-	request.VSwitchId = "vsw-j6cvaap9o5a7et8uumqyx"
-	request.ZoneId = "cn-hongkong-c"
-	request.Password = "Fanux#123"
 	request.ClientToken = utils.GetUUID()
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
 	response, err := client.RunInstances(request)
@@ -53,8 +62,11 @@ func New(amount int, dryRun bool) []string {
 	return response.InstanceIdSets.InstanceIdSet
 }
 
-func Delete(dryRun bool, instanceId []string) {
+func Delete(dryRun bool, instanceId []string, region string) {
 	client := getClient()
+	if region == "" {
+		region = "cn-hongkong"
+	}
 	// 创建请求并设置参数
 	request := ecs.CreateDeleteInstancesRequest()
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
@@ -68,9 +80,13 @@ func Delete(dryRun bool, instanceId []string) {
 	logger.Info("删除成功: %s", response.RequestId)
 }
 
-func Describe(instanceId string) (*ecs.DescribeInstanceAttributeResponse, error) {
+func Describe(instanceId string, region string) (*ecs.DescribeInstanceAttributeResponse, error) {
 	client := getClient()
+	if region == "" {
+		region = "cn-hongkong"
+	}
 	request := ecs.CreateDescribeInstanceAttributeRequest()
+	request.RegionId = region
 	request.InstanceId = instanceId
 	return client.DescribeInstanceAttribute(request)
 }
