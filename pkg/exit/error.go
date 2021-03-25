@@ -4,10 +4,9 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
 	"github.com/sealyun/cloud-kernel/pkg/dingding"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
-	"os"
 )
 
-func ProcessError(err error) {
+func ProcessError(err error) error {
 	switch err.(type) {
 	case *errors.ServerError:
 		e := err.(*errors.ServerError)
@@ -25,5 +24,6 @@ func ProcessError(err error) {
 		dingding.DingdingText("离线包打包失败,错误码:"+e.ErrorCode()+",详细信息: "+e.Message(), false)
 	}
 	//_ = os.Stderr.Close()
-	os.Exit(0)
+	//os.Exit(0)
+	return err
 }

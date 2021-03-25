@@ -11,7 +11,9 @@ var (
 type Runtime string
 
 const (
-	EcsPassword = "Fanux#123"
+	EcsPassword    = "Fanux#123"
+	SSHCmdDownload = "https://github.com/cuisongliu/sshcmd/releases/download/v1.5.3/sshcmd"
+	SealosDownload = "https://sealyun.oss-accelerate.aliyuncs.com/latest/sealos"
 )
 
 const (

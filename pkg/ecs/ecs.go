@@ -45,7 +45,7 @@ func getRegion() map[string]*ecs.RunInstancesRequest {
 	return region
 }
 
-func New(amount int, dryRun bool, region string) []string {
+func New(amount int, dryRun bool, region string, bandwidthOut bool) []string {
 	if region == "" {
 		region = "cn-hongkong"
 	}
@@ -54,15 +54,19 @@ func New(amount int, dryRun bool, region string) []string {
 	request := getRegion()[region]
 	request.Amount = requests.Integer(strconv.Itoa(amount))
 	request.ClientToken = utils.GetUUID()
+	if !bandwidthOut {
+		request.InternetMaxBandwidthOut = "0"
+	}
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
 	response, err := client.RunInstances(request)
 	if err != nil {
-		exit.ProcessError(err)
+		_ = exit.ProcessError(err)
+		return nil
 	}
 	return response.InstanceIdSets.InstanceIdSet
 }
 
-func Delete(dryRun bool, instanceId []string, region string) {
+func Delete(dryRun bool, instanceId []string, region string) error {
 	client := getClient()
 	if region == "" {
 		region = "cn-hongkong"
@@ -75,9 +79,12 @@ func Delete(dryRun bool, instanceId []string, region string) {
 	request.InstanceId = &instanceId
 	response, err := client.DeleteInstances(request)
 	if err != nil {
-		exit.ProcessError(err)
+		_ = exit.ProcessError(err)
+		logger.Error("递归删除ecs")
+		return Delete(dryRun, instanceId, region)
 	}
 	logger.Info("删除成功: %s", response.RequestId)
+	return nil
 }
 
 func Describe(instanceId string, region string) (*ecs.DescribeInstanceAttributeResponse, error) {

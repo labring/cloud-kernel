@@ -1,9 +1,14 @@
 package _package
 
 import (
+	"errors"
 	"fmt"
+	"github.com/sealyun/cloud-kernel/pkg/exit"
+	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"time"
 )
 
 //k8s docker docker k8s
@@ -24,6 +29,11 @@ sh init.sh && sh master.sh && \
 docker pull fanux/lvscare &&  \
 cp /usr/sbin/conntrack ../bin/`
 
+var dockerSaveShell = `cd cloud-kernel &&  \
+docker save -o images.tar  ` + "`docker images|grep ago|awk '{print $1\":\"$2}'` " + `&& \
+mv images.tar kube/images/ && \
+tar zcvf kube%s.tar.gz kube && mv kube%s.tar.gz /tmp/`
+
 type dockerK8s struct {
 	k8sVersion    string
 	dockerVersion string
@@ -43,10 +53,34 @@ func NewDockerK8s(k8sVersion, dockerVersion, publicIP string) _package {
 		publicIP: publicIP,
 	}
 }
-func (d *dockerK8s) InitK8sServer() {
-	d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, d.k8sVersion, d.dockerVersion, d.dockerVersion, d.k8sVersion))
+func (d *dockerK8s) InitK8sServer() error {
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, d.k8sVersion, d.dockerVersion, d.dockerVersion, d.k8sVersion))
+	if err != nil {
+		return exit.ProcessError(err)
+	}
+	return nil
 }
 
-func (d *dockerK8s) WaitImages() {
-	panic("implement me")
+func (d *dockerK8s) WaitImages() error {
+	err := retry.Do(func() error {
+		logger.Debug(fmt.Sprintf("%d. retry wait k8s  pod is running :%s", 4, d.publicIP))
+		checkShell := "docker images   | grep  \"lvscare\" | wc -l"
+		podNum := d.ssh.CmdToString(d.publicIP, checkShell, "")
+		if podNum == "0" {
+			return errors.New("retry error")
+		}
+		return nil
+	}, 100, 500*time.Millisecond, false)
+	if err != nil {
+		return exit.ProcessError(err)
+	}
+	return nil
+}
+
+func (d *dockerK8s) SavePackage() error {
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, d.k8sVersion, d.k8sVersion))
+	if err != nil {
+		return exit.ProcessError(err)
+	}
+	return nil
 }

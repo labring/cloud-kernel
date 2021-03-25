@@ -93,45 +93,6 @@ func readPipe(host string, pipe io.Reader, isErr bool) {
 	}
 }
 
-func (ss *SSH) CmdAsyncChan(host string, cmd string, ch chan bool) error {
-	if ss.Debug {
-		logger.Debug("[%s] %s", host, cmd)
-	}
-	session, err := ss.Connect(host)
-	if err != nil {
-		logger.Error("[ssh][%s]Error create ssh session failed,%s", host, err)
-		return err
-	}
-	defer session.Close()
-	stdout, err := session.StdoutPipe()
-	if err != nil {
-		logger.Error("[ssh][%s]Unable to request StdoutPipe(): %s", host, err)
-		return err
-	}
-	stderr, err := session.StderrPipe()
-	if err != nil {
-		logger.Error("[ssh][%s]Unable to request StderrPipe(): %s", host, err)
-		return err
-	}
-	if err := session.Start(cmd); err != nil {
-		logger.Error("[ssh][%s]Unable to execute command: %s", host, err)
-		return err
-	}
-	doneout := make(chan bool, 1)
-	doneerr := make(chan bool, 1)
-	go func() {
-		readPipeChan(host, stderr, true, nil)
-		doneerr <- true
-	}()
-	go func() {
-		readPipeChan(host, stdout, false, ch)
-		doneout <- true
-	}()
-	<-doneerr
-	<-doneout
-	return session.Wait()
-}
-
 func (ss *SSH) CmdAsync(host string, cmd string) error {
 	if ss.Debug {
 		logger.Debug("[%s] %s", host, cmd)

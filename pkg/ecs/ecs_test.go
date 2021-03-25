@@ -5,7 +5,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	New(1, false, "")
+	New(1, false, "", true)
 	//i-j6c0bltz93t1curhgrhs
 }
 
