@@ -4,8 +4,8 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/sealyun/cloud-kernel/pkg/exit"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
+	cutils "github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"strconv"
 	"sync"
@@ -20,7 +20,7 @@ func getClient() *ecs.Client {
 		vars.LoadVars()
 		hkCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
 		if err != nil {
-			exit.ProcessError(err)
+			_ = cutils.ProcessError(err)
 		}
 	})
 	return hkCli
@@ -60,7 +60,7 @@ func New(amount int, dryRun bool, region string, bandwidthOut bool) []string {
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
 	response, err := client.RunInstances(request)
 	if err != nil {
-		_ = exit.ProcessError(err)
+		_ = cutils.ProcessError(err)
 		return nil
 	}
 	return response.InstanceIdSets.InstanceIdSet
@@ -79,7 +79,7 @@ func Delete(dryRun bool, instanceId []string, region string) error {
 	request.InstanceId = &instanceId
 	response, err := client.DeleteInstances(request)
 	if err != nil {
-		_ = exit.ProcessError(err)
+		_ = cutils.ProcessError(err)
 		logger.Error("递归删除ecs")
 		return Delete(dryRun, instanceId, region)
 	}

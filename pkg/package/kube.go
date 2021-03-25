@@ -10,6 +10,8 @@ import (
 )
 
 func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning bool) error {
+	defaultTimeout := time.Duration(10) * time.Second
+	s.Timeout = &defaultTimeout
 	return retry.Do(func() error {
 		logger.Debug(fmt.Sprintf("%s. retry wait k8s  pod is running :%s", step, publicIP))
 		checkShell := "kubectl  get pod -n kube-system   | grep -v \"RESTARTS\" | wc -l"
@@ -19,7 +21,7 @@ func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning boo
 		}
 		checkShell = "kubectl  get pod -n kube-system  | grep -v \"Running\" | grep -v \"RESTARTS\" | wc -l"
 		notRunningNum := s.CmdToString(publicIP, checkShell, "")
-		if notRunningNum != "0" {
+		if notRunningNum != "" && notRunningNum != "0" {
 			return errors.New("retry error")
 		}
 		if allRunning {
@@ -30,5 +32,5 @@ func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning boo
 			}
 		}
 		return nil
-	}, 200, 500*time.Millisecond, true)
+	}, 20, 500*time.Millisecond, true)
 }

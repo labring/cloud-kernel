@@ -11,9 +11,12 @@ var (
 type Runtime string
 
 const (
-	EcsPassword    = "Fanux#123"
-	SSHCmdDownload = "https://github.com/cuisongliu/sshcmd/releases/download/v1.5.3/sshcmd"
-	SealosDownload = "https://sealyun.oss-accelerate.aliyuncs.com/latest/sealos"
+	EcsPassword              = "Fanux#123"
+	SSHCmdDownload           = "https://github.com/cuisongliu/sshcmd/releases/download/v1.5.3/sshcmd"
+	SealosDownload           = "https://sealyun.oss-accelerate.aliyuncs.com/latest/sealos"
+	CriCtlVersion            = "1.20.0"
+	DefaultDockerVersion     = "19.03.12"
+	DefaultContainerdVersion = "1.3.9"
 )
 
 const (

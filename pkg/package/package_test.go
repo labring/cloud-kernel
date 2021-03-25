@@ -5,8 +5,12 @@ import (
 	"testing"
 )
 
-func TestPackage(t *testing.T) {
-	Package(vars.Docker, "1.19.9", "19.03.12")
+func TestPackageDocker(t *testing.T) {
+	Package(vars.Docker, "1.19.9", "")
+}
+
+func TestPackageContainerd(t *testing.T) {
+	Package(vars.Containerd, "1.20.0", "")
 }
 
 func TestSaveImage(t *testing.T) {

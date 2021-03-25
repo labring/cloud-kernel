@@ -4,10 +4,10 @@ import (
 	"errors"
 	aliyunEcs "github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
-	"github.com/sealyun/cloud-kernel/pkg/exit"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
+	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"time"
 )
@@ -41,7 +41,7 @@ func Package(rt vars.Runtime, k8sVersion, runtimeVersion string) {
 		}
 		return nil
 	}, 100, 1*time.Second, false); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	publicIP := instanceInfo.PublicIpAddress.IpAddress[0]
@@ -61,43 +61,41 @@ func Package(rt vars.Runtime, k8sVersion, runtimeVersion string) {
 			return nil
 		}
 	}, 100, 500*time.Millisecond, true); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	var k8s _package
 	switch rt {
 	case vars.Docker:
 		k8s = NewDockerK8s(k8sVersion, runtimeVersion, publicIP)
+	case vars.Containerd:
+		k8s = NewContainerdK8s(k8sVersion, runtimeVersion, publicIP)
 	}
 	if k8s == nil {
-		_ = exit.ProcessError(errors.New("k8s interface is nil"))
+		_ = utils.ProcessError(errors.New("k8s interface is nil"))
 		return
 	}
 	logger.Info("3. install k8s[ " + k8sVersion + " ] : " + publicIP)
 	if err = k8s.InitK8sServer(); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	logger.Info("4. wait k8s[ " + k8sVersion + " ] pull all images: " + publicIP)
 	if err = checkKubeStatus("4", publicIP, s, false); err != nil {
-		_ = exit.ProcessError(err)
-		return
-	}
-	if err = s.CmdAsync(publicIP, "docker images"); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	if err = s.CmdAsync(publicIP, "kubectl get pod -n kube-system"); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	if err = k8s.WaitImages(); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	logger.Info("5. k8s[ " + k8sVersion + " ] image save: " + publicIP)
 	if err = k8s.SavePackage(); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)

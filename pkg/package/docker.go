@@ -3,10 +3,10 @@ package _package
 import (
 	"errors"
 	"fmt"
-	"github.com/sealyun/cloud-kernel/pkg/exit"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
+	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"time"
 )
@@ -54,14 +54,21 @@ func NewDockerK8s(k8sVersion, dockerVersion, publicIP string) _package {
 	}
 }
 func (d *dockerK8s) InitK8sServer() error {
+	if d.dockerVersion == "" {
+		d.dockerVersion = vars.DefaultDockerVersion
+	}
 	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, d.k8sVersion, d.dockerVersion, d.dockerVersion, d.k8sVersion))
 	if err != nil {
-		return exit.ProcessError(err)
+		return utils.ProcessError(err)
 	}
 	return nil
 }
 
 func (d *dockerK8s) WaitImages() error {
+	if err := d.ssh.CmdAsync(d.publicIP, "docker images"); err != nil {
+		_ = utils.ProcessError(err)
+		return err
+	}
 	err := retry.Do(func() error {
 		logger.Debug(fmt.Sprintf("%d. retry wait k8s  pod is running :%s", 4, d.publicIP))
 		checkShell := "docker images   | grep  \"lvscare\" | wc -l"
@@ -72,7 +79,7 @@ func (d *dockerK8s) WaitImages() error {
 		return nil
 	}, 100, 500*time.Millisecond, false)
 	if err != nil {
-		return exit.ProcessError(err)
+		return utils.ProcessError(err)
 	}
 	return nil
 }
@@ -80,7 +87,7 @@ func (d *dockerK8s) WaitImages() error {
 func (d *dockerK8s) SavePackage() error {
 	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, d.k8sVersion, d.k8sVersion))
 	if err != nil {
-		return exit.ProcessError(err)
+		return utils.ProcessError(err)
 	}
 	return nil
 }

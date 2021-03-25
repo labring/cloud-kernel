@@ -1,4 +1,4 @@
-package exit
+package utils
 
 import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"

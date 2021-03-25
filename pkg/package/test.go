@@ -5,10 +5,10 @@ import (
 	"fmt"
 	aliyunEcs "github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
-	"github.com/sealyun/cloud-kernel/pkg/exit"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
+	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"strings"
 	"time"
@@ -47,7 +47,7 @@ func test(publicIP, k8sVersion string) {
 		}
 		return nil
 	}, 100, 1*time.Second, false); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	privateIPs := make([]string, len(instanceInfos))
@@ -60,11 +60,11 @@ func test(publicIP, k8sVersion string) {
 		Timeout:  nil,
 	}
 	if err = downloadBin(s, publicIP, vars.SSHCmdDownload, "sshcmd"); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	if err = downloadBin(s, publicIP, vars.SealosDownload, "sealos"); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	cmd := "sshcmd --user root --passwd %s --host %s --host %s --host %s --host %s --cmd \"ls -l\""
@@ -80,26 +80,25 @@ func test(publicIP, k8sVersion string) {
 			return nil
 		}
 	}, 100, 500*time.Millisecond, true); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	logger.Debug("test2. install  k8s ( 3 master 1 node ) ")
 	cmd = "sealos init --master %s --master %s --master %s --node %s --passwd %s --version v%s --pkg-url /tmp/kube%s.tar.gz"
 	installCmd := fmt.Sprintf(cmd, privateIPs[0], privateIPs[1], privateIPs[2], privateIPs[3], vars.EcsPassword, k8sVersion, k8sVersion)
 	if err = s.CmdAsync(publicIP, installCmd); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
 	logger.Debug("test3. check  k8s ( 3 master 1 node ) status")
 	master0IP := instanceInfos[0].PublicIpAddress.IpAddress[0]
 	if err = checkKubeStatus("test3", master0IP, s, true); err != nil {
-		_ = exit.ProcessError(err)
+		_ = utils.ProcessError(err)
 		return
 	}
-	if err = s.CmdAsync(master0IP, "kubectl get pod -n kube-system"); err != nil {
-		_ = exit.ProcessError(err)
-		return
-	}
+	defer func() {
+		_ = s.CmdAsync(master0IP, "kubectl get pod -n kube-system")
+	}()
 }
 
 func downloadBin(s sshutil.SSH, publicIP, url, name string) error {
