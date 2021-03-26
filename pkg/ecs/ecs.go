@@ -25,10 +25,7 @@ func getClient() *ecs.Client {
 	return hkCli
 }
 
-func New(amount int, dryRun bool, region string, bandwidthOut bool) []string {
-	if region == "" {
-		region = "cn-hongkong"
-	}
+func New(amount int, dryRun bool, bandwidthOut bool) []string {
 	client := getClient()
 	// 创建请求并设置参数
 	hk := ecs.CreateRunInstancesRequest()
@@ -58,11 +55,8 @@ func New(amount int, dryRun bool, region string, bandwidthOut bool) []string {
 	return response.InstanceIdSets.InstanceIdSet
 }
 
-func Delete(dryRun bool, instanceId []string, region string) error {
+func Delete(dryRun bool, instanceId []string) error {
 	client := getClient()
-	if region == "" {
-		region = "cn-hongkong"
-	}
 	// 创建请求并设置参数
 	request := ecs.CreateDeleteInstancesRequest()
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
@@ -73,19 +67,19 @@ func Delete(dryRun bool, instanceId []string, region string) error {
 	if err != nil {
 		_ = cutils.ProcessError(err)
 		logger.Error("递归删除ecs")
-		return Delete(dryRun, instanceId, region)
+		return Delete(dryRun, instanceId)
 	}
 	logger.Info("删除成功: %s", response.RequestId)
 	return nil
 }
 
-func Describe(instanceId string, region string) (*ecs.DescribeInstanceAttributeResponse, error) {
+func Describe(instanceId string) (*ecs.DescribeInstanceAttributeResponse, error) {
 	client := getClient()
-	if region == "" {
-		region = "cn-hongkong"
-	}
 	request := ecs.CreateDescribeInstanceAttributeRequest()
-	request.RegionId = region
+	request.RegionId = "cn-hongkong"
 	request.InstanceId = instanceId
 	return client.DescribeInstanceAttribute(request)
+}
+
+type Ecs struct {
 }

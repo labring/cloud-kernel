@@ -25,16 +25,16 @@ func Package(k8sVersion string) {
 		logger.Error(err.Error())
 		return
 	}
-	instance := ecs.New(1, false, "", true)
+	instance := ecs.New(1, false, true)
 	logger.Info("1. begin create ecs")
 	var instanceInfo *aliyunEcs.DescribeInstanceAttributeResponse
 	defer func() {
-		_ = ecs.Delete(false, instance, "")
+		_ = ecs.Delete(false, instance)
 	}()
 	if err = retry.Do(func() error {
 		var err error
 		logger.Debug("1. retry fetch ecs info " + instance[0])
-		instanceInfo, err = ecs.Describe(instance[0], "")
+		instanceInfo, err = ecs.Describe(instance[0])
 		if err != nil {
 			return err
 		}
