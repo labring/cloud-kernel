@@ -11,18 +11,18 @@ import (
 	"sync"
 )
 
-var once sync.Once
-var hkCli *ecs.Client
+var ecsOnce sync.Once
+var ecsHKCli *ecs.Client
 
 func getClient() *ecs.Client {
-	once.Do(func() {
+	ecsOnce.Do(func() {
 		var err error
-		hkCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
+		ecsHKCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
 		if err != nil {
 			_ = cutils.ProcessError(err)
 		}
 	})
-	return hkCli
+	return ecsHKCli
 }
 
 func New(amount int, dryRun bool, bandwidthOut bool) []string {
@@ -73,13 +73,23 @@ func Delete(dryRun bool, instanceId []string) error {
 	return nil
 }
 
-func Describe(instanceId string) (*ecs.DescribeInstanceAttributeResponse, error) {
+func Describe(instanceId string) (*CloudInstanceResponse, error) {
 	client := getClient()
 	request := ecs.CreateDescribeInstanceAttributeRequest()
 	request.RegionId = "cn-hongkong"
 	request.InstanceId = instanceId
-	return client.DescribeInstanceAttribute(request)
-}
-
-type Ecs struct {
+	attr, err := client.DescribeInstanceAttribute(request)
+	if err != nil {
+		return nil, err
+	}
+	iResponse := &CloudInstanceResponse{
+		Status: attr.Status,
+	}
+	if len(attr.VpcAttributes.PrivateIpAddress.IpAddress) > 0 {
+		iResponse.PrivateIP = attr.VpcAttributes.PrivateIpAddress.IpAddress[0]
+	}
+	if len(attr.PublicIpAddress.IpAddress) > 0 {
+		iResponse.PublicIP = attr.PublicIpAddress.IpAddress[0]
+	}
+	return iResponse, nil
 }

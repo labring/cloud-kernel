@@ -58,20 +58,14 @@ func GetDefaultHAuth(ak, sk, projectId, AvailabilityZone string) *HClient {
 	}
 }
 
-func (h *HClient) Show(serverid string) {
+func (h *HClient) Show(serverid string) (*model.ShowServerResponse, error) {
 
 	client := h.EcsClient
 
 	request := &model.ShowServerRequest{}
 	request.ServerId = serverid
 
-	response, err := client.ShowServer(request)
-	if err == nil {
-		date, _ := json.MarshalIndent(response.Server, "", "    ")
-		fmt.Println(string(date))
-	} else {
-		fmt.Println(err)
-	}
+	return client.ShowServer(request)
 }
 
 func (h *HClient) GenerateEipServer(count, sizePostPaidServerEipBandwidth, sizePostPaidServerRootVolume int32, eip bool, FlavorRef, ImageRef, Vpcid, SubnetId, adminPass, keyName string) []string {

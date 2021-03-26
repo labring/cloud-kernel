@@ -3,7 +3,6 @@ package _package
 import (
 	"errors"
 	"fmt"
-	aliyunEcs "github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
@@ -17,7 +16,7 @@ func test(publicIP, k8sVersion string) error {
 	master0 := ecs.New(1, false, true)
 	others := ecs.New(3, false, false)
 	instance := append(master0, others...)
-	instanceInfos := make([]*aliyunEcs.DescribeInstanceAttributeResponse, len(instance))
+	instanceInfos := make([]*ecs.CloudInstanceResponse, len(instance))
 	logger.Info("test1. begin create ecs")
 	defer func() {
 		_ = ecs.Delete(false, instance)
@@ -33,11 +32,11 @@ func test(publicIP, k8sVersion string) error {
 			}
 			//master0 publicIP
 			if i == 0 {
-				if len(instanceInfos[i].PublicIpAddress.IpAddress) == 0 {
+				if instanceInfos[i].PublicIP == "" {
 					return errors.New("retry error")
 				}
 			}
-			if len(instanceInfos[i].VpcAttributes.PrivateIpAddress.IpAddress) == 0 {
+			if instanceInfos[i].PrivateIP == "" {
 				return errors.New("retry error")
 			}
 			if instanceInfos[i].Status != "Running" {
@@ -50,7 +49,7 @@ func test(publicIP, k8sVersion string) error {
 	}
 	privateIPs := make([]string, len(instanceInfos))
 	for i, v := range instanceInfos {
-		privateIPs[i] = v.VpcAttributes.PrivateIpAddress.IpAddress[0]
+		privateIPs[i] = v.PrivateIP
 	}
 	s := sshutil.SSH{
 		User:     "root",
@@ -85,7 +84,7 @@ func test(publicIP, k8sVersion string) error {
 		return err
 	}
 	logger.Debug("test3. check  k8s ( 3 master 1 node ) status")
-	master0IP := instanceInfos[0].PublicIpAddress.IpAddress[0]
+	master0IP := instanceInfos[0].PublicIP
 	if err = checkKubeStatus("test3", master0IP, s, true); err != nil {
 		return err
 	}

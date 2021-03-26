@@ -2,7 +2,6 @@ package _package
 
 import (
 	"errors"
-	aliyunEcs "github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
@@ -27,7 +26,7 @@ func Package(k8sVersion string) {
 	}
 	instance := ecs.New(1, false, true)
 	logger.Info("1. begin create ecs")
-	var instanceInfo *aliyunEcs.DescribeInstanceAttributeResponse
+	var instanceInfo *ecs.CloudInstanceResponse
 	defer func() {
 		_ = ecs.Delete(false, instance)
 	}()
@@ -38,7 +37,7 @@ func Package(k8sVersion string) {
 		if err != nil {
 			return err
 		}
-		if len(instanceInfo.PublicIpAddress.IpAddress) == 0 {
+		if instanceInfo.PublicIP == "" {
 			return errors.New("retry error")
 		}
 		if instanceInfo.Status != "Running" {
@@ -49,7 +48,7 @@ func Package(k8sVersion string) {
 		_ = utils.ProcessError(err)
 		return
 	}
-	publicIP := instanceInfo.PublicIpAddress.IpAddress[0]
+	publicIP := instanceInfo.PublicIP
 	s := sshutil.SSH{
 		User:     "root",
 		Password: vars.EcsPassword,
