@@ -22,6 +22,8 @@ func ProcessError(err error) error {
 		logger.Error("ErrorCode: ", e.ErrorCode())
 		logger.Error("Message: ", e.Message())
 		dingding.DingdingText("离线包打包失败,错误码:"+e.ErrorCode()+",详细信息: "+e.Message(), false)
+	default:
+		logger.Error(err.Error())
 	}
 	//_ = os.Stderr.Close()
 	//os.Exit(0)

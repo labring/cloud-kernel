@@ -19,7 +19,7 @@ func upload(publicIP, k8sVersion string) {
 		return
 	}
 	_, v := utils.GetMajorMinorInt(k8sVersion)
-	price := 50
+	var price float64 = 50
 	if v == 0 {
 		price = 0.01
 	}

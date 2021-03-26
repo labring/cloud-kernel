@@ -6,6 +6,7 @@ import (
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
+	"strings"
 	"time"
 )
 
@@ -15,22 +16,30 @@ func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning boo
 	return retry.Do(func() error {
 		logger.Debug(fmt.Sprintf("%s. retry wait k8s  pod is running :%s", step, publicIP))
 		checkShell := "kubectl  get pod -n kube-system   | grep -v \"RESTARTS\" | wc -l"
-		podNum := s.CmdToString(publicIP, checkShell, "")
+		podNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
+		logger.Debug("当前pod的数量为: " + podNum)
 		if podNum == "0" {
 			return errors.New("retry error")
 		}
 		checkShell = "kubectl  get pod -n kube-system  | grep -v \"Running\" | grep -v \"RESTARTS\" | wc -l"
-		notRunningNum := s.CmdToString(publicIP, checkShell, "")
+		notRunningNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
+		logger.Debug("当前pod未Running状态的的数量为: " + notRunningNum)
 		if notRunningNum != "" && notRunningNum != "0" {
+			return errors.New("retry error")
+		}
+		checkShell = "kubectl  get pod -n kube-system  | grep  \"Running\" | grep calico-node | wc -l"
+		calicoNodeNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
+		logger.Debug("当前calico的Running状态的的数量为: " + notRunningNum)
+		if calicoNodeNum == "0" {
 			return errors.New("retry error")
 		}
 		if allRunning {
 			checkShell = "kubectl  get pod -n kube-system  | grep  0/ | wc -l"
-			zeroRunningNum := s.CmdToString(publicIP, checkShell, "")
+			zeroRunningNum := strings.TrimSpace(s.CmdToString(publicIP, checkShell, ""))
 			if zeroRunningNum != "0" {
 				return errors.New("retry error")
 			}
 		}
 		return nil
-	}, 20, 500*time.Millisecond, true)
+	}, 50, 1*time.Second, false)
 }

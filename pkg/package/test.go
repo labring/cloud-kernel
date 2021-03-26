@@ -89,14 +89,22 @@ func test(publicIP, k8sVersion string) error {
 	if err = checkKubeStatus("test3", master0IP, s, true); err != nil {
 		return err
 	}
-	defer func() {
-		_ = s.CmdAsync(master0IP, "kubectl get pod -n kube-system")
-	}()
+	checkShell := "kubectl  get nodes  | grep master | wc -l"
+	masterNum := strings.TrimSpace(s.CmdToString(master0IP, checkShell, ""))
+	if masterNum != "3" {
+		return errors.New("当前集群master节点不为3")
+	}
+	checkShell = "kubectl  get nodes  | grep \"<none>\" | wc -l"
+	nodeNum := strings.TrimSpace(s.CmdToString(master0IP, checkShell, ""))
+	if nodeNum != "1" {
+		return errors.New("当前集群node节点不为1")
+	}
+	_ = s.CmdAsync(master0IP, "kubectl get pod -n kube-system")
 	return nil
 }
 
 func downloadBin(s sshutil.SSH, publicIP, url, name string) error {
-	if err := s.CmdAsync(publicIP, fmt.Sprintf("wget %s && chmod +x %s && mv %s /usr/bin", url, name, name)); err != nil {
+	if err := s.CmdAsync(publicIP, fmt.Sprintf("wget %s -O %s && chmod +x %s && mv %s /usr/bin", url, name, name, name)); err != nil {
 		return err
 	}
 	return nil

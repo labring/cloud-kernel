@@ -73,7 +73,7 @@ func Package(k8sVersion string) {
 	if utils.For120(k8sVersion) {
 		k8s = NewContainerdK8s(publicIP)
 	} else {
-		k8s = NewContainerdK8s(publicIP)
+		k8s = NewDockerK8s(publicIP)
 	}
 	if k8s == nil {
 		_ = utils.ProcessError(errors.New("k8s interface is nil"))
