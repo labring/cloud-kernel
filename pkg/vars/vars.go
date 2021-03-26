@@ -3,9 +3,7 @@ package vars
 import (
 	"errors"
 	"fmt"
-	"github.com/sealyun/cloud-kernel/pkg/sshcmd/cmd"
 	"os"
-	"strings"
 )
 
 var (
@@ -14,6 +12,7 @@ var (
 	AkSK           string
 	MarketCtlToken string
 	KubeVersion    string
+	IsAmd64        bool
 
 	SSHCmdDownload    = "https://github.com/cuisongliu/sshcmd/releases/download/v%s/sshcmd%s"                 //sshcmd-arm64
 	SealosDownload    = "https://sealyun.oss-accelerate.aliyuncs.com/v%s/sealos%s"                            //sealos-arm64
@@ -44,22 +43,6 @@ const (
 	defaultMarketCtlVersion = "1.0.5" //v1.0.5
 	defaultSSHCmdVersion    = "1.5.5"
 )
-
-func IsAmd64() bool {
-	arch := strings.ReplaceAll(cmd.CmdToString("arch"), "\n", "")
-	amd64 := true
-	switch arch {
-	case "x86_64":
-	case "i386":
-		amd64 = true
-	case "arm64":
-	case "aarch64":
-		amd64 = false
-	default:
-		amd64 = true
-	}
-	return amd64
-}
 
 func platform() map[string]map[bool]string {
 	return map[string]map[bool]string{
@@ -109,8 +92,11 @@ func LoadVars() error {
 			return errors.New("环境变量CLOUD_KUBE_VERSION未设置，请设置后重试")
 		}
 	}
-	isAmd64 := IsAmd64()
-	KubeShell = fmt.Sprintf(KubeShell, KubeVersion, platform()["kube"][isAmd64])
+	isAmd64 := os.Getenv("CLOUD_KERNEL_ARM64")
+	if isAmd64 == "true" {
+		IsAmd64 = true
+	}
+	KubeShell = fmt.Sprintf(KubeShell, KubeVersion, platform()["kube"][IsAmd64])
 	DingDing = os.Getenv("CLOUD_KERNEL_DINGDING")
 	MarketCtlToken = os.Getenv("CLOUD_KERNEL_MARKETCTL")
 	//sshcmd
@@ -118,38 +104,38 @@ func LoadVars() error {
 	if v := os.Getenv("CLOUD_KERNEL_SSHCMD_VERSION"); v != "" {
 		sshCmdVersion = v
 	}
-	SSHCmdDownload = fmt.Sprintf(SSHCmdDownload, sshCmdVersion, platform()["sshcmd"][isAmd64])
+	SSHCmdDownload = fmt.Sprintf(SSHCmdDownload, sshCmdVersion, platform()["sshcmd"][IsAmd64])
 	//sealos
 	sealosVersion := defaultSealosVersion
 	if v := os.Getenv("CLOUD_KERNEL_SEALOS_VERSION"); v != "" {
 		sealosVersion = v
 	}
-	SealosDownload = fmt.Sprintf(SealosDownload, sealosVersion, platform()["sealos"][isAmd64])
+	SealosDownload = fmt.Sprintf(SealosDownload, sealosVersion, platform()["sealos"][IsAmd64])
 	//marketctl
 	marketCtlVersion := defaultMarketCtlVersion
 	if v := os.Getenv("CLOUD_KERNEL_MARKET_CTL_VERSION"); v != "" {
 		marketCtlVersion = v
 	}
-	MarketCtlDownload = fmt.Sprintf(MarketCtlDownload, marketCtlVersion, platform()["marketctl"][isAmd64])
+	MarketCtlDownload = fmt.Sprintf(MarketCtlDownload, marketCtlVersion, platform()["marketctl"][IsAmd64])
 
 	//containerd
 	containerdVersion := defaultContainerdVersion
 	if v := os.Getenv("CLOUD_KERNEL_CONTAINERD_VERSION"); v != "" {
 		containerdVersion = v
 	}
-	ContainerdShell = fmt.Sprintf(ContainerdShell, containerdVersion, platform()["containerd"][isAmd64])
+	ContainerdShell = fmt.Sprintf(ContainerdShell, containerdVersion, platform()["containerd"][IsAmd64])
 
 	dockerVersion := defaultDockerVersion
 	if v := os.Getenv("CLOUD_KERNEL_DOCKER_VERSION"); v != "" {
 		dockerVersion = v
 	}
-	DockerShell = fmt.Sprintf(DockerShell, platform()["docker"][isAmd64], dockerVersion)
+	DockerShell = fmt.Sprintf(DockerShell, platform()["docker"][IsAmd64], dockerVersion)
 
 	crictlVersion := defaultCriCtlVersion
 	if v := os.Getenv("CLOUD_KERNEL_CRICTL_VERSION"); v != "" {
 		crictlVersion = v
 	}
-	CrictlShell = fmt.Sprintf(CrictlShell, crictlVersion, platform()["crictl"][isAmd64])
+	CrictlShell = fmt.Sprintf(CrictlShell, crictlVersion, platform()["crictl"][IsAmd64])
 	return nil
 }
 
