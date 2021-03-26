@@ -17,7 +17,6 @@ var hkCli *ecs.Client
 func getClient() *ecs.Client {
 	once.Do(func() {
 		var err error
-		vars.LoadVars()
 		hkCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
 		if err != nil {
 			_ = cutils.ProcessError(err)
@@ -26,8 +25,12 @@ func getClient() *ecs.Client {
 	return hkCli
 }
 
-func getRegion() map[string]*ecs.RunInstancesRequest {
-	region := make(map[string]*ecs.RunInstancesRequest)
+func New(amount int, dryRun bool, region string, bandwidthOut bool) []string {
+	if region == "" {
+		region = "cn-hongkong"
+	}
+	client := getClient()
+	// 创建请求并设置参数
 	hk := ecs.CreateRunInstancesRequest()
 	hk.ImageId = "centos_7_04_64_20G_alibase_201701015.vhd"
 	hk.InstanceType = "ecs.c5.xlarge"
@@ -41,24 +44,13 @@ func getRegion() map[string]*ecs.RunInstancesRequest {
 	hk.VSwitchId = "vsw-j6cvaap9o5a7et8uumqyx"
 	hk.ZoneId = "cn-hongkong-c"
 	hk.Password = vars.EcsPassword
-	region["cn-hongkong"] = hk
-	return region
-}
-
-func New(amount int, dryRun bool, region string, bandwidthOut bool) []string {
-	if region == "" {
-		region = "cn-hongkong"
-	}
-	client := getClient()
-	// 创建请求并设置参数
-	request := getRegion()[region]
-	request.Amount = requests.Integer(strconv.Itoa(amount))
-	request.ClientToken = utils.GetUUID()
+	hk.Amount = requests.Integer(strconv.Itoa(amount))
+	hk.ClientToken = utils.GetUUID()
 	if !bandwidthOut {
-		request.InternetMaxBandwidthOut = "0"
+		hk.InternetMaxBandwidthOut = "0"
 	}
-	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
-	response, err := client.RunInstances(request)
+	hk.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
+	response, err := client.RunInstances(hk)
 	if err != nil {
 		_ = cutils.ProcessError(err)
 		return nil

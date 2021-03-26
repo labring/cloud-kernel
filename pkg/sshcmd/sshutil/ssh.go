@@ -51,28 +51,6 @@ func (ss *SSH) CmdAndError(host string, cmd string) ([]byte, error) {
 	}
 	return b, nil
 }
-func readPipeChan(host string, pipe io.Reader, isErr bool, ch chan bool) {
-	r := bufio.NewReader(pipe)
-	for {
-		line, _, err := r.ReadLine()
-		if line == nil {
-			if ch != nil {
-				ch <- true
-			}
-			return
-		} else if err != nil {
-			logger.Info("[%s] %s", host, line)
-			logger.Error("[ssh] [%s] %s", host, err)
-			return
-		} else {
-			if isErr {
-				logger.Error("[%s] %s", host, line)
-			} else {
-				logger.Info("[%s] %s", host, line)
-			}
-		}
-	}
-}
 func readPipe(host string, pipe io.Reader, isErr bool) {
 	r := bufio.NewReader(pipe)
 	for {

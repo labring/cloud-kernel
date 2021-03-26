@@ -8,13 +8,12 @@ import (
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
-	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"strings"
 	"time"
 )
 
-func test(publicIP, k8sVersion string) {
+func test(publicIP, k8sVersion string) error {
 	master0 := ecs.New(1, false, "", true)
 	others := ecs.New(3, false, "", false)
 	instance := append(master0, others...)
@@ -47,8 +46,7 @@ func test(publicIP, k8sVersion string) {
 		}
 		return nil
 	}, 100, 1*time.Second, false); err != nil {
-		_ = utils.ProcessError(err)
-		return
+		return err
 	}
 	privateIPs := make([]string, len(instanceInfos))
 	for i, v := range instanceInfos {
@@ -60,12 +58,10 @@ func test(publicIP, k8sVersion string) {
 		Timeout:  nil,
 	}
 	if err = downloadBin(s, publicIP, vars.SSHCmdDownload, "sshcmd"); err != nil {
-		_ = utils.ProcessError(err)
-		return
+		return err
 	}
 	if err = downloadBin(s, publicIP, vars.SealosDownload, "sealos"); err != nil {
-		_ = utils.ProcessError(err)
-		return
+		return err
 	}
 	cmd := "sshcmd --user root --passwd %s --host %s --host %s --host %s --host %s --cmd \"ls -l\""
 	connShell := fmt.Sprintf(cmd, vars.EcsPassword, privateIPs[0], privateIPs[1], privateIPs[2], privateIPs[3])
@@ -80,25 +76,23 @@ func test(publicIP, k8sVersion string) {
 			return nil
 		}
 	}, 100, 500*time.Millisecond, true); err != nil {
-		_ = utils.ProcessError(err)
-		return
+		return err
 	}
 	logger.Debug("test2. install  k8s ( 3 master 1 node ) ")
 	cmd = "sealos init --master %s --master %s --master %s --node %s --passwd %s --version v%s --pkg-url /tmp/kube%s.tar.gz"
 	installCmd := fmt.Sprintf(cmd, privateIPs[0], privateIPs[1], privateIPs[2], privateIPs[3], vars.EcsPassword, k8sVersion, k8sVersion)
 	if err = s.CmdAsync(publicIP, installCmd); err != nil {
-		_ = utils.ProcessError(err)
-		return
+		return err
 	}
 	logger.Debug("test3. check  k8s ( 3 master 1 node ) status")
 	master0IP := instanceInfos[0].PublicIpAddress.IpAddress[0]
 	if err = checkKubeStatus("test3", master0IP, s, true); err != nil {
-		_ = utils.ProcessError(err)
-		return
+		return err
 	}
 	defer func() {
 		_ = s.CmdAsync(master0IP, "kubectl get pod -n kube-system")
 	}()
+	return nil
 }
 
 func downloadBin(s sshutil.SSH, publicIP, url, name string) error {

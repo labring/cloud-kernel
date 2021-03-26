@@ -43,14 +43,14 @@ disable_firewalld() {
   lsb_dist=$( get_distribution )
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 	case "$lsb_dist" in
-		ubuntu|deepin|debian|kylin)
+		ubuntu|deepin|debian)
 			command -v ufw &> /dev/null && ufw disable
 		;;
-		centos|rhel)
+		centos|rhel|kylin|neokylin)
 			systemctl stop firewalld && systemctl disable firewalld
 		;;
 		*)
-			echo "current system not support"
+			systemctl stop firewalld && systemctl disable firewalld
 		;;
 	esac
 }
@@ -65,7 +65,7 @@ fi
 cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
-net.ipv4.conf.all.rp_filter=1
+net.ipv4.conf.all.rp_filter=0
 EOF
 sysctl --system
 sysctl -w net.ipv4.ip_forward=1
@@ -80,7 +80,7 @@ cp ../conf/kubelet.service /etc/systemd/system/
 [ -d /etc/systemd/system/kubelet.service.d ] || mkdir /etc/systemd/system/kubelet.service.d
 cp ../conf/10-kubeadm.conf /etc/systemd/system/kubelet.service.d/
 
-if grep "SystemdCgroup = true"  /etc/containerd/config.toml &> /dev/nul; then  
+if grep "SystemdCgroup = true"  /etc/containerd/config.toml &> /dev/nul; then
   driver=systemd
 else
   driver=cgroupfs

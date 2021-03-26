@@ -34,7 +34,6 @@ const textBody = `{
 }`
 
 func DingdingText(text string, atAll bool) {
-	vars.LoadVars()
 	var envMap = make(map[string]interface{})
 	envMap["text"] = text
 	envMap["at_all"] = atAll
@@ -42,7 +41,6 @@ func DingdingText(text string, atAll bool) {
 }
 
 func DingdingLink(title, text, url string, atAll bool) {
-	vars.LoadVars()
 	var envMap = make(map[string]interface{})
 	envMap["title"] = title
 	envMap["text"] = text

@@ -18,14 +18,19 @@ type _package interface {
 	SavePackage() error
 }
 
-func Package(k8sVersion, runtimeVersion string) {
+func Package(k8sVersion string) {
+	vars.KubeVersion = k8sVersion
+	err := vars.LoadVars()
+	if err != nil {
+		logger.Error(err.Error())
+		return
+	}
 	instance := ecs.New(1, false, "", true)
 	logger.Info("1. begin create ecs")
 	var instanceInfo *aliyunEcs.DescribeInstanceAttributeResponse
 	defer func() {
 		_ = ecs.Delete(false, instance, "")
 	}()
-	var err error
 	if err = retry.Do(func() error {
 		var err error
 		logger.Debug("1. retry fetch ecs info " + instance[0])
@@ -60,15 +65,15 @@ func Package(k8sVersion, runtimeVersion string) {
 		} else {
 			return nil
 		}
-	}, 100, 500*time.Millisecond, true); err != nil {
+	}, 20, 500*time.Millisecond, true); err != nil {
 		_ = utils.ProcessError(err)
 		return
 	}
 	var k8s _package
 	if utils.For120(k8sVersion) {
-		k8s = NewContainerdK8s(k8sVersion, runtimeVersion, publicIP)
+		k8s = NewContainerdK8s(publicIP)
 	} else {
-		k8s = NewContainerdK8s(k8sVersion, runtimeVersion, publicIP)
+		k8s = NewContainerdK8s(publicIP)
 	}
 	if k8s == nil {
 		_ = utils.ProcessError(errors.New("k8s interface is nil"))
@@ -98,6 +103,12 @@ func Package(k8sVersion, runtimeVersion string) {
 		return
 	}
 	logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)
-	//test(publicIP, k8sVersion)
-	upload(publicIP, k8sVersion)
+	if err = test(publicIP, k8sVersion); err != nil {
+		_ = utils.ProcessError(err)
+		return
+	} else {
+		logger.Info("6. k8s[ " + k8sVersion + " ] uploading: " + publicIP)
+		upload(publicIP, k8sVersion)
+	}
+	logger.Info("7. k8s[ " + k8sVersion + " ] finished. " + publicIP)
 }

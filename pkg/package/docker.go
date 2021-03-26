@@ -11,14 +11,12 @@ import (
 	"time"
 )
 
-//k8s docker docker k8s
+//k8s dockerShell k8s
 var dockerShell = `yum install -y git conntrack && \
 git clone https://github.com/sealyun/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/docker/* kube/ && \
-wget https://dl.k8s.io/v%s/kubernetes-server-linux-amd64.tar.gz && \
-wget https://download.docker.com/linux/static/stable/x86_64/docker-%s.tgz && \
-cp  docker-%s.tgz kube/docker/docker.tgz && \
-tar zxvf kubernetes-server-linux-amd64.tar.gz && \
+%s && \
+%s && \
 cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
@@ -35,16 +33,13 @@ mv images.tar kube/images/ && \
 tar zcvf kube%s.tar.gz kube && mv kube%s.tar.gz /tmp/`
 
 type dockerK8s struct {
-	k8sVersion    string
-	dockerVersion string
-	ssh           sshutil.SSH
-	publicIP      string
+	ssh      sshutil.SSH
+	publicIP string
 }
 
-func NewDockerK8s(k8sVersion, dockerVersion, publicIP string) _package {
+func NewDockerK8s(publicIP string) _package {
+
 	return &dockerK8s{
-		k8sVersion:    k8sVersion,
-		dockerVersion: dockerVersion,
 		ssh: sshutil.SSH{
 			User:     "root",
 			Password: vars.EcsPassword,
@@ -54,10 +49,7 @@ func NewDockerK8s(k8sVersion, dockerVersion, publicIP string) _package {
 	}
 }
 func (d *dockerK8s) InitK8sServer() error {
-	if d.dockerVersion == "" {
-		d.dockerVersion = vars.DefaultDockerVersion
-	}
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, d.k8sVersion, d.dockerVersion, d.dockerVersion, d.k8sVersion))
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, vars.KubeShell, vars.DockerShell, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}
@@ -85,7 +77,7 @@ func (d *dockerK8s) WaitImages() error {
 }
 
 func (d *dockerK8s) SavePackage() error {
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, d.k8sVersion, d.k8sVersion))
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, vars.KubeVersion, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}

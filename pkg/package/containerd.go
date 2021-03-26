@@ -15,12 +15,9 @@ import (
 var containerdShell = `yum install -y git conntrack && \
 git clone https://github.com/sealyun/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/containerd/* kube/ && \
-wget https://dl.k8s.io/v%s/kubernetes-server-linux-amd64.tar.gz && \
-wget https://sealyun.oss-accelerate.aliyuncs.com/tools/cri-containerd-cni-%s-linux-amd64.tar.gz && \
-wget https://sealyun.oss-accelerate.aliyuncs.com/tools/crictl-v%s-linux-amd64.tar.gz && \
-cp  cri-containerd-cni-%s-linux-amd64.tar.gz kube/containerd/cri-containerd-cni-linux-amd64.tar.gz && \
-tar zxvf kubernetes-server-linux-amd64.tar.gz && tar xf crictl-v%s-linux-amd64.tar.gz && \
-cp  crictl kube/bin/ && \
+%s && \
+%s && \
+%s && \
 cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
@@ -38,16 +35,12 @@ mv images.tar kube/images/ && \
 tar zcvf kube%s.tar.gz kube && mv kube%s.tar.gz /tmp/`
 
 type containerdK8s struct {
-	k8sVersion        string
-	containerdVersion string
-	ssh               sshutil.SSH
-	publicIP          string
+	ssh      sshutil.SSH
+	publicIP string
 }
 
-func NewContainerdK8s(k8sVersion, containerdVersion, publicIP string) _package {
+func NewContainerdK8s(publicIP string) _package {
 	return &containerdK8s{
-		k8sVersion:        k8sVersion,
-		containerdVersion: containerdVersion,
 		ssh: sshutil.SSH{
 			User:     "root",
 			Password: vars.EcsPassword,
@@ -57,12 +50,9 @@ func NewContainerdK8s(k8sVersion, containerdVersion, publicIP string) _package {
 	}
 }
 func (d *containerdK8s) InitK8sServer() error {
-	if d.containerdVersion == "" {
-		d.containerdVersion = vars.DefaultContainerdVersion
-	}
 	err := d.ssh.CmdAsync(d.publicIP,
-		fmt.Sprintf(containerdShell, d.k8sVersion,
-			d.containerdVersion, vars.CriCtlVersion, d.containerdVersion, vars.CriCtlVersion, d.k8sVersion))
+		fmt.Sprintf(containerdShell, vars.KubeShell,
+			vars.ContainerdShell, vars.CrictlShell, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}
@@ -90,7 +80,7 @@ func (d *containerdK8s) WaitImages() error {
 }
 
 func (d *containerdK8s) SavePackage() error {
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(containerdSaveShell, d.k8sVersion, d.k8sVersion))
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(containerdSaveShell, vars.KubeVersion, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}

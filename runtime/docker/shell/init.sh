@@ -39,14 +39,15 @@ disable_firewalld() {
   lsb_dist=$( get_distribution )
 	lsb_dist="$(echo "$lsb_dist" | tr '[:upper:]' '[:lower:]')"
 	case "$lsb_dist" in
-		ubuntu|deepin|debian|kylin)
+		ubuntu|deepin|debian|raspbian)
 			command -v ufw &> /dev/null && ufw disable
 		;;
-		centos|rhel)
+		centos|rhel|ol|sles|kylin|neokylin)
 			systemctl stop firewalld && systemctl disable firewalld
 		;;
 		*)
-			echo "current system not support"
+		 	systemctl stop firewalld && systemctl disable firewalld
+			echo "unknown system, use default to stop firewalld"
 		;;
 	esac
 }
@@ -61,7 +62,7 @@ fi
 cat <<EOF >  /etc/sysctl.d/k8s.conf
 net.bridge.bridge-nf-call-ip6tables = 1
 net.bridge.bridge-nf-call-iptables = 1
-net.ipv4.conf.all.rp_filter=1
+net.ipv4.conf.all.rp_filter=0
 EOF
 sysctl --system
 sysctl -w net.ipv4.ip_forward=1
