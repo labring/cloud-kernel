@@ -13,20 +13,20 @@ import (
 )
 
 func test(publicIP, k8sVersion string) error {
-	master0 := ecs.New(1, false, true)
-	others := ecs.New(3, false, false)
+	master0 := ecs.NewCloud().New(1, false, true)
+	others := ecs.NewCloud().New(3, false, false)
 	instance := append(master0, others...)
 	instanceInfos := make([]*ecs.CloudInstanceResponse, len(instance))
 	logger.Info("test1. begin create ecs")
 	defer func() {
-		_ = ecs.Delete(false, instance)
+		_ = ecs.NewCloud().Delete(false, instance)
 	}()
 	var err error
 	if err = retry.Do(func() error {
 		var err error
 		logger.Debug("test1. retry fetch ecs info " + strings.Join(instance, ","))
 		for i, v := range instance {
-			instanceInfos[i], err = ecs.Describe(v)
+			instanceInfos[i], err = ecs.NewCloud().Describe(v)
 			if err != nil {
 				return err
 			}
@@ -39,7 +39,7 @@ func test(publicIP, k8sVersion string) error {
 			if instanceInfos[i].PrivateIP == "" {
 				return errors.New("retry error")
 			}
-			if instanceInfos[i].Status != "Running" {
+			if !instanceInfos[i].IsOk {
 				return errors.New("retry error")
 			}
 		}

@@ -1,50 +1,36 @@
 package huawei
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/core/auth/basic"
 	ecs "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2/model"
 	eip "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/eip/v2"
-	emodel "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/eip/v2/model"
+	"github.com/sealyun/cloud-kernel/pkg/vars"
 )
 
 const (
-	//endpoint     = "https://ecs.ap-southeast-3.myhuaweicloud.com"
-	//VpcEndpoint  = "https://vpc.ap-southeast-3.myhuaweicloud.com"
-	//projectID    = "06b275f705800f262f3bc014ffcdbde1"
-	defaultCount = 1
+	projectID = "06b275f707800f272feec0147ee22b32"
+	zone      = "ap-southeast-1a"
 )
 
 type HClient struct {
-	Count            int32
-	Ak               string
-	Sk               string
-	EcsEndpoint      string
-	VpcEndpoint      string
-	ProjectId        string
-	AvailabilityZone string
-	EcsClient        *ecs.EcsClient
-	EipClient        *eip.EipClient
+	Zone      string
+	EcsClient *ecs.EcsClient
+	EipClient *eip.EipClient
 }
 
-func GetDefaultHAuth(ak, sk, projectId, AvailabilityZone string) *HClient {
-	n := len(AvailabilityZone)
-	ecsEndpoint := fmt.Sprintf("https://ecs.%s.myhuaweicloud.com", AvailabilityZone[:n-1])
-	vpcEndpoint := fmt.Sprintf("https://vpc.%s.myhuaweicloud.com", AvailabilityZone[:n-1])
+func NewClientWithAccessKey(ak, sk string) *HClient {
+	n := len(zone)
+	ecsEndpoint := fmt.Sprintf("https://ecs.%s.myhuaweicloud.com", zone[:n-1])
+	vpcEndpoint := fmt.Sprintf("https://vpc.%s.myhuaweicloud.com", zone[:n-1])
 	auth := basic.NewCredentialsBuilder().
 		WithAk(ak).
 		WithSk(sk).
-		WithProjectId(projectId).
+		WithProjectId(projectID).
 		Build()
 	return &HClient{
-		EcsEndpoint:      ecsEndpoint,
-		VpcEndpoint:      vpcEndpoint,
-		ProjectId:        projectId,
-		AvailabilityZone: AvailabilityZone,
-		Ak:               ak,
-		Sk:               sk,
+		Zone: zone,
 		EcsClient: ecs.NewEcsClient(
 			ecs.EcsClientBuilder().
 				WithEndpoint(ecsEndpoint).
@@ -58,23 +44,23 @@ func GetDefaultHAuth(ak, sk, projectId, AvailabilityZone string) *HClient {
 	}
 }
 
-func (h *HClient) Show(serverid string) (*model.ShowServerResponse, error) {
+func (h *HClient) Describe(serverId string) (*model.ShowServerResponse, error) {
 
 	client := h.EcsClient
 
 	request := &model.ShowServerRequest{}
-	request.ServerId = serverid
+	request.ServerId = serverId
 
 	return client.ShowServer(request)
 }
 
-func (h *HClient) GenerateEipServer(count, sizePostPaidServerEipBandwidth, sizePostPaidServerRootVolume int32, eip bool, FlavorRef, ImageRef, Vpcid, SubnetId, adminPass, keyName string) []string {
+func (h *HClient) RunInstances(amount int, dryRun bool, bandwidthOut bool) ([]string, error) {
 
 	client := h.EcsClient
 	request := &model.CreatePostPaidServersRequest{}
 	var listPostPaidServerNicNicsPostPaidServer = []model.PostPaidServerNic{
 		{
-			SubnetId: SubnetId,
+			SubnetId: "179d3994-1a14-44df-bfb1-bb1e5495bb45",
 		},
 	}
 	var listPostPaidServerTagServerTagsPostPaidServer = []model.PostPaidServerTag{
@@ -84,10 +70,11 @@ func (h *HClient) GenerateEipServer(count, sizePostPaidServerEipBandwidth, sizeP
 		},
 	}
 	publicipPostPaidServer := &model.PostPaidServerPublicip{}
-	if eip {
+	if bandwidthOut {
 		chargemodePostPaidServerEipBandwidth := "traffic"
+		var serverEipBandwidth int32 = 100
 		bandwidthPostPaidServerEip := &model.PostPaidServerEipBandwidth{
-			Size:       &sizePostPaidServerEipBandwidth,
+			Size:       &serverEipBandwidth,
 			Sharetype:  model.GetPostPaidServerEipBandwidthSharetypeEnum().PER,
 			Chargemode: &chargemodePostPaidServerEipBandwidth,
 		}
@@ -99,129 +86,53 @@ func (h *HClient) GenerateEipServer(count, sizePostPaidServerEipBandwidth, sizeP
 			Eip: eipPostPaidServerPublicip,
 		}
 	}
-	countPostPaidServer := count
+	countPostPaidServer := int32(amount)
 	isAutoRenamePostPaidServer := false
-	keyNamePostPaidServer := keyName
-	adminPassPostPaidServer := adminPass
+	adminPassPostPaidServer := vars.EcsPassword
+	var serverRootVolume int32 = 40
 	rootVolumePostPaidServer := &model.PostPaidServerRootVolume{
 		Volumetype: model.GetPostPaidServerRootVolumeVolumetypeEnum().SSD,
-		Size:       &sizePostPaidServerRootVolume,
+		Size:       &serverRootVolume,
 	}
 	serverCreatePostPaidServersRequestBody := &model.PostPaidServer{
-		AvailabilityZone: h.AvailabilityZone,
-		FlavorRef:        FlavorRef,
-		ImageRef:         ImageRef,
+		AvailabilityZone: h.Zone,
+		FlavorRef:        "kc1.large.2",
+		ImageRef:         "04678140-fcc1-465d-ba36-3a2b19d155f9",
 		Name:             "sealos",
 		Nics:             listPostPaidServerNicNicsPostPaidServer,
 		Publicip:         publicipPostPaidServer,
 		RootVolume:       rootVolumePostPaidServer,
 		ServerTags:       &listPostPaidServerTagServerTagsPostPaidServer,
-		Vpcid:            Vpcid,
-		KeyName:          &keyNamePostPaidServer,
+		Vpcid:            "085d5e2a-8339-4780-bb6b-8b418959fc9a",
 		AdminPass:        &adminPassPostPaidServer,
 		IsAutoRename:     &isAutoRenamePostPaidServer,
 		Count:            &countPostPaidServer,
 	}
 	request.Body = &model.CreatePostPaidServersRequestBody{
 		Server: serverCreatePostPaidServersRequestBody,
+		DryRun: &dryRun,
 	}
-
 	response, err := client.CreatePostPaidServers(request)
-
 	if err == nil {
-		date, _ := json.MarshalIndent(response, "", "    ")
-		fmt.Println(string(date))
-		return *response.ServerIds
+		return *response.ServerIds, nil
 	} else {
-		fmt.Println(err)
-		return nil
+		return nil, err
 	}
 }
 
-func (h *HClient) DeleteServer(serverId string, delPublicIp bool) {
+func (h *HClient) DeleteInstances(serverId []string, delPublicIp bool) (*model.DeleteServersResponse, error) {
 
 	client := h.EcsClient
 
 	request := &model.DeleteServersRequest{}
-	var listServerIdServersDeleteServersRequestBody = []model.ServerId{
-		{
-			Id: serverId,
-		},
+	var listServerIdServersDeleteServersRequestBody = make([]model.ServerId, 0)
+	for _, v := range serverId {
+		listServerIdServersDeleteServersRequestBody = append(listServerIdServersDeleteServersRequestBody, model.ServerId{Id: v})
 	}
-
 	request.Body = &model.DeleteServersRequestBody{
 		DeletePublicip: &delPublicIp,
 		Servers:        listServerIdServersDeleteServersRequestBody,
 	}
 
-	response, err := client.DeleteServers(request)
-
-	if err == nil {
-		date, _ := json.MarshalIndent(response, "", "    ")
-		fmt.Println(string(date))
-	} else {
-		fmt.Println(err)
-	}
-}
-
-func (h *HClient) ListServer() {
-	client := h.EcsClient
-	request := &model.ListServersDetailsRequest{}
-	response, err := client.ListServersDetails(request)
-
-	if err == nil {
-		//fmt.Printf("%+v\n", response.Servers)
-		date, _ := json.MarshalIndent(response.Servers, "", "    ")
-		fmt.Println(string(date))
-	} else {
-		fmt.Println(err)
-	}
-}
-func (h *HClient) ListIps() error {
-
-	auth := basic.NewCredentialsBuilder().
-		WithAk(h.Ak).
-		WithSk(h.Sk).
-		WithProjectId("").
-		Build()
-
-	client := eip.NewEipClient(
-		eip.EipClientBuilder().
-			WithEndpoint(h.VpcEndpoint).
-			WithCredential(auth).
-			Build())
-
-	request := &emodel.NeutronListFloatingIpsRequest{}
-
-	response, err := client.NeutronListFloatingIps(request)
-
-	if err == nil {
-		date, _ := json.MarshalIndent(response.Floatingips, "", "    ")
-		fmt.Println(string(date))
-	}
-	return err
-}
-
-func (h *HClient) DeleteIp(ipId string) error {
-	auth := basic.NewCredentialsBuilder().
-		WithAk(h.Ak).
-		WithSk(h.Sk).
-		WithProjectId("").
-		Build()
-
-	client := eip.NewEipClient(
-		eip.EipClientBuilder().
-			WithEndpoint(h.VpcEndpoint).
-			WithCredential(auth).
-			Build())
-
-	request := &emodel.NeutronDeleteFloatingIpRequest{}
-	request.FloatingipId = ipId
-
-	response, err := client.NeutronDeleteFloatingIp(request)
-
-	if err == nil {
-		fmt.Printf("%+v\n", response)
-	}
-	return err
+	return client.DeleteServers(request)
 }

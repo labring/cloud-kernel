@@ -92,7 +92,7 @@ func LoadVars() error {
 			return errors.New("环境变量CLOUD_KUBE_VERSION未设置，请设置后重试")
 		}
 	}
-	isAmd64 := os.Getenv("CLOUD_KERNEL_ARM64")
+	isAmd64 := os.Getenv("CLOUD_KERNEL_AMD64")
 	if isAmd64 == "true" {
 		IsAmd64 = true
 	}

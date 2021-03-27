@@ -24,23 +24,23 @@ func Package(k8sVersion string) {
 		logger.Error(err.Error())
 		return
 	}
-	instance := ecs.New(1, false, true)
+	instance := ecs.NewCloud().New(1, false, true)
 	logger.Info("1. begin create ecs")
 	var instanceInfo *ecs.CloudInstanceResponse
 	defer func() {
-		_ = ecs.Delete(false, instance)
+		_ = ecs.NewCloud().Delete(false, instance)
 	}()
 	if err = retry.Do(func() error {
 		var err error
 		logger.Debug("1. retry fetch ecs info " + instance[0])
-		instanceInfo, err = ecs.Describe(instance[0])
+		instanceInfo, err = ecs.NewCloud().Describe(instance[0])
 		if err != nil {
 			return err
 		}
 		if instanceInfo.PublicIP == "" {
 			return errors.New("retry error")
 		}
-		if instanceInfo.Status != "Running" {
+		if !instanceInfo.IsOk {
 			return errors.New("retry error")
 		}
 		return nil

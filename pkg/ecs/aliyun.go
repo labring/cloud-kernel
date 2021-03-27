@@ -11,29 +11,31 @@ import (
 	"sync"
 )
 
-var ecsOnce sync.Once
-var ecsHKCli *ecs.Client
-
-func getClient() *ecs.Client {
-	ecsOnce.Do(func() {
+func (a *AliyunEcs) getClient() *ecs.Client {
+	a.ecsOnce.Do(func() {
 		var err error
-		ecsHKCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
+		a.ecsHKCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
 		if err != nil {
-			_ = cutils.ProcessError(err)
+			_ = cutils.ProcessCloudError(err)
 		}
 	})
-	return ecsHKCli
+	return a.ecsHKCli
 }
 
-func New(amount int, dryRun bool, bandwidthOut bool) []string {
-	client := getClient()
+type AliyunEcs struct {
+	ecsOnce  sync.Once
+	ecsHKCli *ecs.Client
+}
+
+func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
+	client := a.getClient()
 	// 创建请求并设置参数
 	hk := ecs.CreateRunInstancesRequest()
 	hk.ImageId = "centos_7_04_64_20G_alibase_201701015.vhd"
 	hk.InstanceType = "ecs.c5.xlarge"
 	hk.InternetChargeType = "PayByTraffic"
-	hk.InternetMaxBandwidthIn = "50"
-	hk.InternetMaxBandwidthOut = "50"
+	hk.InternetMaxBandwidthIn = "100"
+	hk.InternetMaxBandwidthOut = "100"
 	hk.InstanceChargeType = "PostPaid"
 	hk.SpotStrategy = "SpotAsPriceGo"
 	hk.RegionId = "cn-hongkong"
@@ -49,14 +51,14 @@ func New(amount int, dryRun bool, bandwidthOut bool) []string {
 	hk.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
 	response, err := client.RunInstances(hk)
 	if err != nil {
-		_ = cutils.ProcessError(err)
+		_ = cutils.ProcessCloudError(err)
 		return nil
 	}
 	return response.InstanceIdSets.InstanceIdSet
 }
 
-func Delete(dryRun bool, instanceId []string) error {
-	client := getClient()
+func (a *AliyunEcs) Delete(dryRun bool, instanceId []string) error {
+	client := a.getClient()
 	// 创建请求并设置参数
 	request := ecs.CreateDeleteInstancesRequest()
 	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
@@ -65,16 +67,16 @@ func Delete(dryRun bool, instanceId []string) error {
 	request.InstanceId = &instanceId
 	response, err := client.DeleteInstances(request)
 	if err != nil {
-		_ = cutils.ProcessError(err)
+		_ = cutils.ProcessCloudError(err)
 		logger.Error("递归删除ecs")
-		return Delete(dryRun, instanceId)
+		return a.Delete(dryRun, instanceId)
 	}
 	logger.Info("删除成功: %s", response.RequestId)
 	return nil
 }
 
-func Describe(instanceId string) (*CloudInstanceResponse, error) {
-	client := getClient()
+func (a *AliyunEcs) Describe(instanceId string) (*CloudInstanceResponse, error) {
+	client := a.getClient()
 	request := ecs.CreateDescribeInstanceAttributeRequest()
 	request.RegionId = "cn-hongkong"
 	request.InstanceId = instanceId
@@ -83,7 +85,7 @@ func Describe(instanceId string) (*CloudInstanceResponse, error) {
 		return nil, err
 	}
 	iResponse := &CloudInstanceResponse{
-		Status: attr.Status,
+		IsOk: attr.Status == "Running",
 	}
 	if len(attr.VpcAttributes.PrivateIpAddress.IpAddress) > 0 {
 		iResponse.PrivateIP = attr.VpcAttributes.PrivateIpAddress.IpAddress[0]

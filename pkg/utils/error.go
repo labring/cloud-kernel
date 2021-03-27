@@ -7,6 +7,13 @@ import (
 )
 
 func ProcessError(err error) error {
+	//_ = os.Stderr.Close()
+	//os.Exit(0)
+	logger.Error(err.Error())
+	return err
+}
+
+func ProcessCloudError(err error) error {
 	switch err.(type) {
 	case *errors.ServerError:
 		e := err.(*errors.ServerError)
@@ -24,6 +31,7 @@ func ProcessError(err error) error {
 		dingding.DingdingText("离线包打包失败,错误码:"+e.ErrorCode()+",详细信息: "+e.Message(), false)
 	default:
 		logger.Error(err.Error())
+		dingding.DingdingText("离线包打包失败,详细信息: "+err.Error(), false)
 	}
 	//_ = os.Stderr.Close()
 	//os.Exit(0)
