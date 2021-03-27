@@ -15,7 +15,7 @@ type CloudInstanceResponse struct {
 
 func NewCloud() cloud {
 	var c cloud
-	if vars.IsAmd64 {
+	if !vars.IsArm64 {
 		c = &AliyunEcs{}
 	} else {
 		c = &HuaweiEcs{}

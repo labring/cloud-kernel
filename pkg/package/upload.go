@@ -19,11 +19,11 @@ func upload(publicIP, k8sVersion string) {
 		return
 	}
 	_, v := utils.GetMajorMinorInt(k8sVersion)
-	var price float64 = 50
+	var price = vars.DefaultPrice
 	if v == 0 {
-		price = 0.01
+		price = vars.DefaultZeroPrice
 	}
-	yaml := fmt.Sprintf(vars.MarketYaml, k8sVersion, price, k8sVersion)
+	yaml := fmt.Sprintf(vars.MarketYaml, k8sVersion, price, vars.DefaultClass, vars.DefaultProduct, k8sVersion)
 	_ = s.CmdAsync(publicIP, "echo \""+yaml+"\" > /tmp/marketctl_"+k8sVersion+".yaml")
 	_ = s.CmdAsync(publicIP, "cat /tmp/marketctl_"+k8sVersion+".yaml")
 	//marketctl apply -f /tmp/marketctl_%s.yaml --domain https://www.sealyun.com --token %s --dd-token %s

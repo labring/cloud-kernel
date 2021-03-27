@@ -1,9 +1,7 @@
 package vars
 
 import (
-	"errors"
 	"fmt"
-	"os"
 )
 
 var (
@@ -11,8 +9,7 @@ var (
 	AkId           string
 	AkSK           string
 	MarketCtlToken string
-	KubeVersion    string
-	IsAmd64        bool
+	IsArm64        bool
 
 	SSHCmdDownload    = "https://github.com/cuisongliu/sshcmd/releases/download/v%s/sshcmd%s"                 //sshcmd-arm64
 	SealosDownload    = "https://sealyun.oss-accelerate.aliyuncs.com/v%s/sealos%s"                            //sealos-arm64
@@ -30,6 +27,11 @@ var (
 
 	KubeShell = "wget https://dl.k8s.io/v%s/kubernetes-server-linux-%s.tar.gz -O  kubernetes-server.tar.gz && " + //arm64
 		"tar zxvf kubernetes-server.tar.gz"
+	KubeVersion      string
+	DefaultPrice     float64
+	DefaultZeroPrice float64
+	DefaultClass     = "cloud_kernel" //cloud_kernel
+	DefaultProduct   = "kubernetes"   //kubernetes
 )
 
 const (
@@ -47,95 +49,51 @@ const (
 func platform() map[string]map[bool]string {
 	return map[string]map[bool]string{
 		"sshcmd": {
-			true:  "",
-			false: "-arm64",
+			false: "",
+			true:  "-arm64",
 		},
 		"sealos": {
-			true:  "",
-			false: "-arm64",
+			false: "",
+			true:  "-arm64",
 		},
 		"marketctl": {
-			true:  "amd64",
-			false: "arm64",
+			false: "amd64",
+			true:  "arm64",
 		},
 		"docker": {
-			true:  "x86_64",
-			false: "aarch64",
+			false: "x86_64",
+			true:  "aarch64",
 		},
 		"containerd": {
-			true:  "amd64",
-			false: "arm64",
+			false: "amd64",
+			true:  "arm64",
 		},
 		"crictl": {
-			true:  "amd64",
-			false: "arm64",
+			false: "amd64",
+			true:  "arm64",
 		},
 		"kube": {
-			true:  "amd64",
-			false: "arm64",
+			false: "amd64",
+			true:  "arm64",
 		},
 	}
 }
 
 func LoadVars() error {
-	AkId = os.Getenv("CLOUD_KERNEL_AKID")
-	if AkId == "" {
-		return errors.New("环境变量CLOUD_KERNEL_AKID未设置，请设置后重试")
-	}
-	AkSK = os.Getenv("CLOUD_KERNEL_AKSK")
-	if AkSK == "" {
-		return errors.New("环境变量CLOUD_KERNEL_AKSK未设置，请设置后重试")
-	}
-	if KubeVersion == "" {
-		KubeVersion = os.Getenv("CLOUD_KUBE_VERSION")
-		if KubeVersion == "" {
-			return errors.New("环境变量CLOUD_KUBE_VERSION未设置，请设置后重试")
-		}
-	}
-	isAmd64 := os.Getenv("CLOUD_KERNEL_AMD64")
-	if isAmd64 == "true" {
-		IsAmd64 = true
-	}
-	KubeShell = fmt.Sprintf(KubeShell, KubeVersion, platform()["kube"][IsAmd64])
-	DingDing = os.Getenv("CLOUD_KERNEL_DINGDING")
-	MarketCtlToken = os.Getenv("CLOUD_KERNEL_MARKETCTL")
+	KubeShell = fmt.Sprintf(KubeShell, KubeVersion, platform()["kube"][IsArm64])
 	//sshcmd
-	sshCmdVersion := defaultSSHCmdVersion
-	if v := os.Getenv("CLOUD_KERNEL_SSHCMD_VERSION"); v != "" {
-		sshCmdVersion = v
-	}
-	SSHCmdDownload = fmt.Sprintf(SSHCmdDownload, sshCmdVersion, platform()["sshcmd"][IsAmd64])
+	SSHCmdDownload = fmt.Sprintf(SSHCmdDownload, defaultSSHCmdVersion, platform()["sshcmd"][IsArm64])
 	//sealos
-	sealosVersion := defaultSealosVersion
-	if v := os.Getenv("CLOUD_KERNEL_SEALOS_VERSION"); v != "" {
-		sealosVersion = v
-	}
-	SealosDownload = fmt.Sprintf(SealosDownload, sealosVersion, platform()["sealos"][IsAmd64])
+	SealosDownload = fmt.Sprintf(SealosDownload, defaultSealosVersion, platform()["sealos"][IsArm64])
 	//marketctl
-	marketCtlVersion := defaultMarketCtlVersion
-	if v := os.Getenv("CLOUD_KERNEL_MARKET_CTL_VERSION"); v != "" {
-		marketCtlVersion = v
-	}
-	MarketCtlDownload = fmt.Sprintf(MarketCtlDownload, marketCtlVersion, platform()["marketctl"][IsAmd64])
-
+	MarketCtlDownload = fmt.Sprintf(MarketCtlDownload, defaultMarketCtlVersion, platform()["marketctl"][IsArm64])
 	//containerd
-	containerdVersion := defaultContainerdVersion
-	if v := os.Getenv("CLOUD_KERNEL_CONTAINERD_VERSION"); v != "" {
-		containerdVersion = v
+	ContainerdShell = fmt.Sprintf(ContainerdShell, defaultContainerdVersion, platform()["containerd"][IsArm64])
+	DockerShell = fmt.Sprintf(DockerShell, platform()["docker"][IsArm64], defaultDockerVersion)
+	CrictlShell = fmt.Sprintf(CrictlShell, defaultCriCtlVersion, platform()["crictl"][IsArm64])
+	if IsArm64 {
+		DefaultProduct = "kubernetes-arm64"
 	}
-	ContainerdShell = fmt.Sprintf(ContainerdShell, containerdVersion, platform()["containerd"][IsAmd64])
-
-	dockerVersion := defaultDockerVersion
-	if v := os.Getenv("CLOUD_KERNEL_DOCKER_VERSION"); v != "" {
-		dockerVersion = v
-	}
-	DockerShell = fmt.Sprintf(DockerShell, platform()["docker"][IsAmd64], dockerVersion)
-
-	crictlVersion := defaultCriCtlVersion
-	if v := os.Getenv("CLOUD_KERNEL_CRICTL_VERSION"); v != "" {
-		crictlVersion = v
-	}
-	CrictlShell = fmt.Sprintf(CrictlShell, crictlVersion, platform()["crictl"][IsAmd64])
 	return nil
 }
 
@@ -146,23 +104,9 @@ market:
       name: v%s
       price: %.2f
       product:
-        class: cloud_kernel
-        productName: kubernetes
+        class: %s
+        productName: %s
       url: /tmp/kube%s.tar.gz
-    status:
-      productVersionStatus: ONLINE
-  kind: productVersion`
-
-const MarketArmYaml = `
-market:
-  body:
-    spec:
-      name: v%s
-      price: %.2f
-      product:
-        class: cloud_kernel
-        productName: kubernetes-arm
-      url: /tmp/kube%s-arm64.tar.gz
     status:
       productVersionStatus: ONLINE
   kind: productVersion`
