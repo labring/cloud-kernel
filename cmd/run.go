@@ -16,10 +16,11 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
+	"github.com/sealyun/cloud-kernel/pkg/github"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/marketctl"
+	_package "github.com/sealyun/cloud-kernel/pkg/package"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"os"
 
@@ -31,7 +32,16 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "执行打包离线包并发布到sealyun上",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		gfetch := github.Fetch()
+		if len(gfetch) == 0 {
+			logger.Warn("当月无需要更新版本")
+			os.Exit(0)
+		} else {
+			for _, v := range gfetch {
+				logger.Debug("当前更新版本: " + v)
+				_package.Package(v)
+			}
+		}
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if vars.AkId == "" {
