@@ -6,6 +6,7 @@ type cloud interface {
 	New(amount int, dryRun bool, bandwidthOut bool) []string
 	Delete(dryRun bool, instanceId []string) error
 	Describe(instanceId string) (*CloudInstanceResponse, error)
+	Healthy() error
 }
 type CloudInstanceResponse struct {
 	IsOk      bool

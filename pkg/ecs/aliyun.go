@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"errors"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
@@ -25,6 +26,20 @@ func (a *AliyunEcs) getClient() *ecs.Client {
 type AliyunEcs struct {
 	ecsOnce  sync.Once
 	ecsHKCli *ecs.Client
+}
+
+func (a *AliyunEcs) Healthy() error {
+	cli, err := ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
+	if err != nil {
+		return err
+	}
+	r := ecs.CreateDescribeZonesRequest()
+	r.RegionId = "cn-hongkong"
+	_, err = cli.DescribeZones(r)
+	if err != nil {
+		return errors.New("阿里云 " + err.Error())
+	}
+	return nil
 }
 
 func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {

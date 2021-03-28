@@ -17,7 +17,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/sealyun/cloud-kernel/pkg/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/sealyun/cloud-kernel/pkg/marketctl"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"os"
 
@@ -42,6 +44,12 @@ var runCmd = &cobra.Command{
 			cmd.Help()
 			os.Exit(0)
 		}
+		cloud := ecs.NewCloud()
+		if err := cloud.Healthy(); err != nil {
+			logger.Error("云厂商的AKSK验证失败: " + err.Error())
+			cmd.Help()
+			os.Exit(0)
+		}
 		if vars.MarketCtlToken == "" {
 			logger.Error("MarketCtl的Token为空无法上传离线包")
 			cmd.Help()
@@ -49,6 +57,11 @@ var runCmd = &cobra.Command{
 		}
 		if vars.DingDing == "" {
 			logger.Warn("钉钉的Token为空,无法自动通知")
+		}
+		if err := marketctl.Healthy(); err != nil {
+			logger.Error("MarketCtl的状态监测失败无法上传离线包: " + err.Error())
+			cmd.Help()
+			os.Exit(0)
 		}
 	},
 }
@@ -61,9 +74,9 @@ func init() {
 	runCmd.Flags().StringVar(&vars.AkSK, "sk", "", "云厂商的 akSK")
 	runCmd.Flags().StringVar(&vars.DingDing, "dingding", "", "钉钉的Token")
 	runCmd.Flags().StringVar(&vars.MarketCtlToken, "marketctl", "", "marketctl的token")
-	runCmd.Flags().BoolVar(&vars.IsArm64, "amd64", false, "是否为amd64")
+	runCmd.Flags().BoolVar(&vars.IsArm64, "arm64", false, "是否为arm64")
 	runCmd.Flags().Float64Var(&vars.DefaultPrice, "price", 50, "离线包的价格")
-	runCmd.Flags().Float64Var(&vars.DefaultZeroPrice, "price", 0.01, "离线包.0版本的价格")
+	runCmd.Flags().Float64Var(&vars.DefaultZeroPrice, "zoro-price", 0.01, "离线包.0版本的价格")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

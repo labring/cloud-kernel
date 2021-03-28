@@ -1,6 +1,7 @@
 package ecs
 
 import (
+	"errors"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2/model"
 	"github.com/sealyun/cloud-kernel/pkg/ecs/huawei"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
@@ -21,6 +22,14 @@ type HuaweiEcs struct {
 	ecsHKCli *huawei.HClient
 }
 
+func (a *HuaweiEcs) Healthy() error {
+	client := a.getClient()
+	_, err := client.EcsClient.NovaListAvailabilityZones(&model.NovaListAvailabilityZonesRequest{})
+	if err != nil {
+		return errors.New("华为云 " + err.Error())
+	}
+	return nil
+}
 func (a *HuaweiEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
 	client := a.getClient()
 	ids, err := client.RunInstances(amount, dryRun, bandwidthOut)
