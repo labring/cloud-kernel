@@ -23,6 +23,7 @@ import (
 	_package "github.com/sealyun/cloud-kernel/pkg/package"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
@@ -39,7 +40,7 @@ var runCmd = &cobra.Command{
 		} else {
 			for _, v := range gfetch {
 				logger.Debug("当前更新版本: " + v)
-				_package.Package(v)
+				_package.Package(strings.ReplaceAll(v, "v", ""))
 			}
 		}
 	},
