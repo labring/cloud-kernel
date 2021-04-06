@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
@@ -33,10 +34,13 @@ type sealyunVersion struct {
 	} `json:"data"`
 }
 
-func Fetch() []string {
+func Fetch() ([]string, error) {
 	packageOffline := make([]string, 0)
 	tags := fetchTags()
 	sealyunV := fetchSealyunTags()
+	if len(sealyunV) == 0 {
+		return packageOffline, errors.New("获取sealyun的tag失败")
+	}
 	for _, tag := range tags {
 		logger.Debug("当月github发布有效版本:" + tag)
 		if v, ok := sealyunV[tag]; ok && v != "" {
@@ -46,7 +50,7 @@ func Fetch() []string {
 			packageOffline = append(packageOffline, tag)
 		}
 	}
-	return packageOffline
+	return packageOffline, nil
 }
 
 func fetchTags() []string {

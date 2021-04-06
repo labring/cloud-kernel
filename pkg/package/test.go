@@ -19,7 +19,7 @@ func test(publicIP, k8sVersion string) error {
 	instanceInfos := make([]*ecs.CloudInstanceResponse, len(instance))
 	logger.Info("test1. begin create ecs")
 	defer func() {
-		_ = ecs.NewCloud().Delete(false, instance)
+		ecs.NewCloud().Delete(instance, 10)
 	}()
 	var err error
 	if err = retry.Do(func() error {

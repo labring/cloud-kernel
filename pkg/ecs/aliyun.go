@@ -72,22 +72,30 @@ func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
 	return response.InstanceIdSets.InstanceIdSet
 }
 
-func (a *AliyunEcs) Delete(dryRun bool, instanceId []string) error {
+func (a *AliyunEcs) Delete(instanceId []string, maxCount int) {
 	client := a.getClient()
 	// 创建请求并设置参数
 	request := ecs.CreateDeleteInstancesRequest()
-	request.DryRun = requests.Boolean(strconv.FormatBool(dryRun))
+	request.DryRun = requests.Boolean(strconv.FormatBool(false))
 	request.Force = "true"
 	request.RegionId = "cn-hongkong"
 	request.InstanceId = &instanceId
-	response, err := client.DeleteInstances(request)
-	if err != nil {
-		_ = cutils.ProcessCloudError(err)
+	var response *ecs.DeleteInstancesResponse
+	var err error
+	for i := 0; i < maxCount; i++ {
 		logger.Error("递归删除ecs")
-		return a.Delete(dryRun, instanceId)
+		response, err = client.DeleteInstances(request)
+		if err != nil {
+			_ = cutils.ProcessCloudError(err)
+		} else {
+			break
+		}
 	}
-	logger.Info("删除成功: %s", response.RequestId)
-	return nil
+	if err == nil {
+		logger.Info("删除ecs成功: %s", response.RequestId)
+	} else {
+		logger.Error("删除ecs失败: %v", instanceId)
+	}
 }
 
 func (a *AliyunEcs) Describe(instanceId string) (*CloudInstanceResponse, error) {

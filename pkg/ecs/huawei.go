@@ -40,16 +40,24 @@ func (a *HuaweiEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
 	return ids
 }
 
-func (a *HuaweiEcs) Delete(dryRun bool, instanceId []string) error {
+func (a *HuaweiEcs) Delete(instanceId []string, maxCount int) {
 	client := a.getClient()
-	response, err := client.DeleteInstances(instanceId, true)
-	if err != nil {
-		_ = cutils.ProcessCloudError(err)
-		logger.Error("递归删除ecs")
-		return a.Delete(dryRun, instanceId)
+	var response *model.DeleteServersResponse
+	var err error
+	for i := 0; i < maxCount; i++ {
+		logger.Error("循环删除ecs")
+		response, err = client.DeleteInstances(instanceId, true)
+		if err != nil {
+			_ = cutils.ProcessCloudError(err)
+		} else {
+			break
+		}
 	}
-	logger.Info("删除成功: %s", *response.JobId)
-	return nil
+	if err == nil {
+		logger.Info("删除ecs成功: %s", *response.JobId)
+	} else {
+		logger.Error("删除ecs失败: %v", instanceId)
+	}
 }
 
 func (a *HuaweiEcs) Describe(instanceId string) (*CloudInstanceResponse, error) {
