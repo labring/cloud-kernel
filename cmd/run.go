@@ -33,36 +33,43 @@ var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "执行打包离线包并发布到sealyun上",
 	Run: func(cmd *cobra.Command, args []string) {
-		gfetch := github.Fetch()
+		gfetch, err := github.Fetch()
+		if err != nil {
+			logger.Fatal(err.Error())
+			os.Exit(0)
+		}
 		if len(gfetch) == 0 {
 			logger.Warn("当月无需要更新版本")
 			os.Exit(0)
 		} else {
 			for _, v := range gfetch {
 				logger.Debug("当前更新版本: " + v)
-				_package.Package(strings.ReplaceAll(v, "v", ""))
+				if err := _package.Package(strings.ReplaceAll(v, "v", "")); err != nil {
+					logger.Error(err)
+					logger.Warn("更新版本发生错误,跳过当前版本: " + v)
+				}
 			}
 		}
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
 		if vars.AkId == "" {
-			logger.Error("云厂商的akId为空,无法创建虚拟机")
+			logger.Fatal("云厂商的akId为空,无法创建虚拟机")
 			cmd.Help()
 			os.Exit(-1)
 		}
 		if vars.AkSK == "" {
-			logger.Error("云厂商的akSK为空,无法创建虚拟机")
+			logger.Fatal("云厂商的akSK为空,无法创建虚拟机")
 			cmd.Help()
 			os.Exit(0)
 		}
 		cloud := ecs.NewCloud()
 		if err := cloud.Healthy(); err != nil {
-			logger.Error("云厂商的AKSK验证失败: " + err.Error())
+			logger.Fatal("云厂商的AKSK验证失败: " + err.Error())
 			cmd.Help()
 			os.Exit(0)
 		}
 		if vars.MarketCtlToken == "" {
-			logger.Error("MarketCtl的Token为空无法上传离线包")
+			logger.Fatal("MarketCtl的Token为空无法上传离线包")
 			cmd.Help()
 			os.Exit(0)
 		}
@@ -70,7 +77,7 @@ var runCmd = &cobra.Command{
 			logger.Warn("钉钉的Token为空,无法自动通知")
 		}
 		if err := marketctl.Healthy(); err != nil {
-			logger.Error("MarketCtl的状态监测失败无法上传离线包: " + err.Error())
+			logger.Fatal("MarketCtl的状态监测失败无法上传离线包: " + err.Error())
 			cmd.Help()
 			os.Exit(0)
 		}

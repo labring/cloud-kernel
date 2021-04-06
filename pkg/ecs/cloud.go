@@ -4,7 +4,7 @@ import "github.com/sealyun/cloud-kernel/pkg/vars"
 
 type cloud interface {
 	New(amount int, dryRun bool, bandwidthOut bool) []string
-	Delete(dryRun bool, instanceId []string) error
+	Delete(instanceId []string, maxCount int)
 	Describe(instanceId string) (*CloudInstanceResponse, error)
 	Healthy() error
 }
