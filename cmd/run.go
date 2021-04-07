@@ -21,28 +21,27 @@ import (
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/marketctl"
 	_package "github.com/sealyun/cloud-kernel/pkg/package"
+	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 )
+
+var gFetch []string
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "执行打包离线包并发布到sealyun上",
 	Run: func(cmd *cobra.Command, args []string) {
-		gfetch, err := github.Fetch()
-		if err != nil {
-			logger.Fatal(err.Error())
-			os.Exit(0)
-		}
-		if len(gfetch) == 0 {
+		if len(gFetch) == 0 {
 			logger.Warn("当月无需要更新版本")
 			os.Exit(0)
 		} else {
-			for _, v := range gfetch {
+			for _, v := range gFetch {
 				logger.Debug("当前更新版本: " + v)
 				if err := _package.Package(strings.ReplaceAll(v, "v", "")); err != nil {
 					logger.Error(err)
@@ -76,8 +75,19 @@ var runCmd = &cobra.Command{
 		if vars.DingDing == "" {
 			logger.Warn("钉钉的Token为空,无法自动通知")
 		}
-		if err := marketctl.Healthy(); err != nil {
-			logger.Fatal("MarketCtl的状态监测失败无法上传离线包: " + err.Error())
+		if err := retry.Do(func() error {
+			err := marketctl.Healthy()
+			if err != nil {
+				return err
+			}
+			gf, err := github.Fetch()
+			if err != nil {
+				return err
+			}
+			gFetch = gf
+			return nil
+		}, 25, 1*time.Second, false); err != nil {
+			logger.Fatal("Sealyun的状态监测失败: " + err.Error())
 			cmd.Help()
 			os.Exit(0)
 		}
