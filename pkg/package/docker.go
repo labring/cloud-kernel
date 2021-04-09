@@ -18,6 +18,7 @@ cd cloud-kernel && mkdir -p kube && cp -rf runtime/docker/* kube/ && \
 %s && \
 %s && \
 %s && \
+%s && \
 cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
@@ -50,7 +51,7 @@ func NewDockerK8s(publicIP string) _package {
 	}
 }
 func (d *dockerK8s) InitK8sServer() error {
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, vars.KubeShell, vars.DockerShell, vars.CrictlShell, vars.KubeVersion))
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, vars.KubeShell, vars.DockerShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}

@@ -2,6 +2,7 @@ package vars
 
 import (
 	"fmt"
+	"os"
 )
 
 var (
@@ -11,24 +12,28 @@ var (
 	MarketCtlToken string
 	IsArm64        bool
 
-	SSHCmdDownload, SealosDownload, MarketCtlDownload, DockerShell, ContainerdShell, CrictlShell, KubeShell string
-	KubeVersion                                                                                             string
-	DefaultPrice                                                                                            float64
-	DefaultZeroPrice                                                                                        float64
-	DefaultClass                                                                                            = "cloud_kernel" //cloud_kernel
-	DefaultProduct                                                                                          = "kubernetes"   //kubernetes
-)
+	SSHCmdDownload, SealosDownload, MarketCtlDownload, DockerShell, ContainerdShell, CrictlShell, KubeShell, NerdctlShell string
+	KubeVersion                                                                                                           string
+	DefaultPrice                                                                                                          float64
+	DefaultZeroPrice                                                                                                      float64
+	DefaultClass                                                                                                          = "cloud_kernel" //cloud_kernel
+	DefaultProduct                                                                                                        = "kubernetes"   //kubernetes
 
-const (
-	EcsPassword = "Fanux#123"
-
+	defaultSealosVersion     = "3.3.9-rc.1"
+	defaultMarketCtlVersion  = "1.0.5" //v1.0.5
+	defaultSSHCmdVersion     = "1.5.5"
+	defaultNerdctlVersion    = "0.7.3"
 	defaultCriCtlVersion     = "1.20.0"
 	defaultDockerVersion     = "19.03.12"
 	defaultContainerdVersion = "1.4.3"
-	FmtSSHCmdDownload        = "https://github.com/cuisongliu/sshcmd/releases/download/v%s/sshcmd%s"                 //sshcmd-arm64
-	FmtSealosDownload        = "https://sealyun.oss-accelerate.aliyuncs.com/v%s/sealos%s"                            //sealos-arm64
-	FmtMarketCtlDownload     = "https://sealyun-market.oss-accelerate.aliyuncs.com/marketctl/v%s/linux_%s/marketctl" //linux_arm64
-	FmtDockerShell           = "wget https://download.docker.com/linux/static/stable/%s/docker-%s.tgz  " +           //aarch64
+)
+
+const (
+	EcsPassword          = "Fanux#123"
+	FmtSSHCmdDownload    = "https://github.com/cuisongliu/sshcmd/releases/download/v%s/sshcmd%s"                 //sshcmd-arm64
+	FmtSealosDownload    = "https://sealyun.oss-accelerate.aliyuncs.com/v%s/sealos%s"                            //sealos-arm64
+	FmtMarketCtlDownload = "https://sealyun-market.oss-accelerate.aliyuncs.com/marketctl/v%s/linux_%s/marketctl" //linux_arm64
+	FmtDockerShell       = "wget https://download.docker.com/linux/static/stable/%s/docker-%s.tgz  " +           //aarch64
 		"-O docker.tgz && cp docker.tgz kube/docker/docker.tgz"
 	FmtContainerdShell = "wget https://sealyun.oss-accelerate.aliyuncs.com/tools/cri-containerd-cni-%s-linux-%s.tar.gz " +
 		"-O cri-containerd-cni-linux.tar.gz && " +
@@ -37,9 +42,8 @@ const (
 		"-O  crictl.tar.gz &&  tar xf crictl.tar.gz && cp crictl kube/bin/"
 	FmtKubeShell = "wget https://dl.k8s.io/v%s/kubernetes-server-linux-%s.tar.gz -O  kubernetes-server.tar.gz && " + //arm64
 		"tar zxvf kubernetes-server.tar.gz"
-	defaultSealosVersion    = "3.3.9-rc.1"
-	defaultMarketCtlVersion = "1.0.5" //v1.0.5
-	defaultSSHCmdVersion    = "1.5.5"
+	FmtNerdctlShell = "wget https://github.com/containerd/nerdctl/releases/download/v%s/nerdctl-%s-linux-%s.tar.gz " +
+		"-O  nerdctl.tar.gz &&  tar xf nerdctl.tar.gz && cp nerdctl kube/bin/ && cp containerd-rootless* kube/bin/"
 )
 
 func platform() map[string]map[bool]string {
@@ -51,6 +55,10 @@ func platform() map[string]map[bool]string {
 		"sealos": {
 			false: "",
 			true:  "-arm64",
+		},
+		"nerdctl": {
+			false: "amd64",
+			true:  "arm64",
 		},
 		"marketctl": {
 			false: "amd64",
@@ -75,7 +83,32 @@ func platform() map[string]map[bool]string {
 	}
 }
 
+func loadEnv() {
+	if v := os.Getenv("SEALOS_VERSION"); v != "" {
+		defaultSealosVersion = v
+	}
+	if v := os.Getenv("MARKET_CTL_VERSION"); v != "" {
+		defaultMarketCtlVersion = v
+	}
+	if v := os.Getenv("SSH_CMD_VERSION"); v != "" {
+		defaultSSHCmdVersion = v
+	}
+	if v := os.Getenv("NERD_CTL_VERSION"); v != "" {
+		defaultNerdctlVersion = v
+	}
+	if v := os.Getenv("CRI_CTL_VERSION"); v != "" {
+		defaultCriCtlVersion = v
+	}
+	if v := os.Getenv("DOCKER_VERSION"); v != "" {
+		defaultDockerVersion = v
+	}
+	if v := os.Getenv("CONTAINERD_VERSION"); v != "" {
+		defaultContainerdVersion = v
+	}
+}
+
 func LoadVars() error {
+	loadEnv()
 	KubeShell = fmt.Sprintf(FmtKubeShell, KubeVersion, platform()["kube"][IsArm64])
 	//sshcmd
 	SSHCmdDownload = fmt.Sprintf(FmtSSHCmdDownload, defaultSSHCmdVersion, platform()["sshcmd"][IsArm64])
@@ -87,6 +120,8 @@ func LoadVars() error {
 	ContainerdShell = fmt.Sprintf(FmtContainerdShell, defaultContainerdVersion, platform()["containerd"][IsArm64])
 	DockerShell = fmt.Sprintf(FmtDockerShell, platform()["docker"][IsArm64], defaultDockerVersion)
 	CrictlShell = fmt.Sprintf(FmtCrictlShell, defaultCriCtlVersion, platform()["crictl"][IsArm64])
+	NerdctlShell = fmt.Sprintf(FmtNerdctlShell, defaultNerdctlVersion, platform()["nerdctl"][IsArm64])
+
 	if IsArm64 {
 		DefaultProduct = "kubernetes-arm64"
 	}

@@ -18,6 +18,7 @@ cd cloud-kernel && mkdir -p kube && cp -rf runtime/containerd/* kube/ && \
 %s && \
 %s && \
 %s && \
+%s && \
 cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
@@ -52,7 +53,7 @@ func NewContainerdK8s(publicIP string) _package {
 func (d *containerdK8s) InitK8sServer() error {
 	err := d.ssh.CmdAsync(d.publicIP,
 		fmt.Sprintf(containerdShell, vars.KubeShell,
-			vars.ContainerdShell, vars.CrictlShell, vars.KubeVersion))
+			vars.ContainerdShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}
