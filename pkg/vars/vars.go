@@ -120,7 +120,7 @@ func LoadVars() error {
 	ContainerdShell = fmt.Sprintf(FmtContainerdShell, defaultContainerdVersion, platform()["containerd"][IsArm64])
 	DockerShell = fmt.Sprintf(FmtDockerShell, platform()["docker"][IsArm64], defaultDockerVersion)
 	CrictlShell = fmt.Sprintf(FmtCrictlShell, defaultCriCtlVersion, platform()["crictl"][IsArm64])
-	NerdctlShell = fmt.Sprintf(FmtNerdctlShell, defaultNerdctlVersion, platform()["nerdctl"][IsArm64])
+	NerdctlShell = fmt.Sprintf(FmtNerdctlShell, defaultNerdctlVersion, defaultNerdctlVersion, platform()["nerdctl"][IsArm64])
 
 	if IsArm64 {
 		DefaultProduct = "kubernetes-arm64"
