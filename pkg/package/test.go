@@ -99,6 +99,7 @@ func test(publicIP, k8sVersion string) error {
 		return errors.New("当前集群node节点不为1")
 	}
 	_ = s.CmdAsync(master0IP, "kubectl get pod -n kube-system")
+	_ = s.CmdAsync(master0IP, "kubectl get nodes -owide")
 	return nil
 }
 
