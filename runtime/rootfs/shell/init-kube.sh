@@ -151,11 +151,4 @@ syncFrequency: 1m0s
 volumeStatsAggPeriod: 1m0s
 EOF
 
-# 修改kubelet
-mkdir -p /etc/systemd/system/kubelet.service.d
-cat > /etc/systemd/system/kubelet.service.d/containerd.conf << eof
-[Service]
-Environment="KUBELET_EXTRA_ARGS=--container-runtime=remote --cgroup-driver=${driver} --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock --image-service-endpoint=unix:///run/containerd/containerd.sock"
-eof
-
 systemctl enable kubelet
