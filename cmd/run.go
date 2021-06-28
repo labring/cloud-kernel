@@ -51,7 +51,7 @@ var runCmd = &cobra.Command{
 		}
 	},
 	PreRun: func(cmd *cobra.Command, args []string) {
-		if vars.AkId == "" {
+		if vars.AkID == "" {
 			logger.Fatal("云厂商的akId为空,无法创建虚拟机")
 			cmd.Help()
 			os.Exit(-1)
@@ -67,30 +67,33 @@ var runCmd = &cobra.Command{
 			cmd.Help()
 			os.Exit(0)
 		}
-		if vars.MarketCtlToken == "" {
-			logger.Fatal("MarketCtl的Token为空无法上传离线包")
-			cmd.Help()
-			os.Exit(0)
-		}
 		if vars.DingDing == "" {
 			logger.Warn("钉钉的Token为空,无法自动通知")
 		}
-		if err := retry.Do(func() error {
-			err := marketctl.Healthy()
-			if err != nil {
-				return err
+		if vars.Uploading {
+			if vars.MarketCtlToken == "" {
+				logger.Fatal("MarketCtl的Token为空无法上传离线包")
+				cmd.Help()
+				os.Exit(0)
 			}
-			gf, err := github.Fetch()
-			if err != nil {
-				return err
+			if err := retry.Do(func() error {
+				err := marketctl.Healthy()
+				if err != nil {
+					return err
+				}
+				gf, err := github.Fetch()
+				if err != nil {
+					return err
+				}
+				gFetch = gf
+				return nil
+			}, 25, 1*time.Second, false); err != nil {
+				logger.Fatal("Sealyun的状态监测失败: " + err.Error())
+				cmd.Help()
+				os.Exit(0)
 			}
-			gFetch = gf
-			return nil
-		}, 25, 1*time.Second, false); err != nil {
-			logger.Fatal("Sealyun的状态监测失败: " + err.Error())
-			cmd.Help()
-			os.Exit(0)
 		}
+
 	},
 }
 
@@ -98,13 +101,15 @@ func init() {
 	rootCmd.AddCommand(runCmd)
 
 	// Here you will define your flags and configuration settings.
-	runCmd.Flags().StringVar(&vars.AkId, "ak", "", "云厂商的 akId")
+	runCmd.Flags().StringVar(&vars.AkID, "ak", "", "云厂商的 akId")
 	runCmd.Flags().StringVar(&vars.AkSK, "sk", "", "云厂商的 akSK")
 	runCmd.Flags().StringVar(&vars.DingDing, "dingding", "", "钉钉的Token")
 	runCmd.Flags().StringVar(&vars.MarketCtlToken, "marketctl", "", "marketctl的token")
 	runCmd.Flags().BoolVar(&vars.IsArm64, "arm64", false, "是否为arm64")
 	runCmd.Flags().Float64Var(&vars.DefaultPrice, "price", 50, "离线包的价格")
 	runCmd.Flags().Float64Var(&vars.DefaultZeroPrice, "zoro-price", 0.01, "离线包.0版本的价格")
+	runCmd.Flags().BoolVar(&vars.Uploading, "uploading", true, "是否上传")
+	runCmd.Flags().BoolVar(&vars.Testing, "testing", true, "是否测试")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

@@ -6,18 +6,26 @@ import (
 )
 
 var (
-	DingDing       string
-	AkId           string
-	AkSK           string
-	MarketCtlToken string
-	IsArm64        bool
-
-	SSHCmdDownload, SealosDownload, MarketCtlDownload, DockerShell, ContainerdShell, CrictlShell, KubeShell, NerdctlShell string
-	KubeVersion                                                                                                           string
-	DefaultPrice                                                                                                          float64
-	DefaultZeroPrice                                                                                                      float64
-	DefaultClass                                                                                                          = "cloud_kernel" //cloud_kernel
-	DefaultProduct                                                                                                        = "kubernetes"   //kubernetes
+	DingDing          string
+	AkID              string
+	AkSK              string
+	MarketCtlToken    string
+	IsArm64           bool
+	Uploading         bool
+	Testing           bool
+	SSHCmdDownload    string
+	SealosDownload    string
+	MarketCtlDownload string
+	DockerShell       string
+	ContainerdShell   string
+	CrictlShell       string
+	KubeShell         string
+	NerdctlShell      string
+	KubeVersion       string
+	DefaultPrice      float64
+	DefaultZeroPrice  float64
+	DefaultClass      = "cloud_kernel" //cloud_kernel
+	DefaultProduct    = "kubernetes"   //kubernetes
 
 	defaultSealosVersion     = "3.3.9-rc.1"
 	defaultMarketCtlVersion  = "1.0.5" //v1.0.5
@@ -106,7 +114,14 @@ func loadEnv() {
 		defaultContainerdVersion = v
 	}
 }
-
+func LoadAKSK() {
+	if v := os.Getenv("CLOUD_KERNEL_AKID"); v != "" {
+		AkID = v
+	}
+	if v := os.Getenv("CLOUD_KERNEL_AKSK"); v != "" {
+		AkSK = v
+	}
+}
 func LoadVars() error {
 	loadEnv()
 	KubeShell = fmt.Sprintf(FmtKubeShell, KubeVersion, platform()["kube"][IsArm64])

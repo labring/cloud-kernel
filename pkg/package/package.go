@@ -95,13 +95,23 @@ func Package(k8sVersion string) error {
 	if err = k8s.SavePackage(); err != nil {
 		return utils.ProcessError(err)
 	}
-	logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)
-	if err = test(publicIP, k8sVersion); err != nil {
-		return utils.ProcessError(err)
+	if vars.Testing {
+		logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)
+		if err = test(publicIP, k8sVersion); err != nil {
+			return utils.ProcessError(err)
+		} else {
+			if vars.Uploading {
+				logger.Info("7. k8s[ " + k8sVersion + " ] uploading: " + publicIP)
+				upload(publicIP, k8sVersion)
+			} else {
+				logger.Info("7. k8s[ " + k8sVersion + " ] skip uploading: " + publicIP)
+			}
+		}
 	} else {
-		logger.Info("6. k8s[ " + k8sVersion + " ] uploading: " + publicIP)
-		upload(publicIP, k8sVersion)
+		logger.Info("6. k8s[ " + k8sVersion + " ] skip testing: " + publicIP)
+		logger.Info("7. k8s[ " + k8sVersion + " ] skip uploading: " + publicIP)
 	}
-	logger.Info("7. k8s[ " + k8sVersion + " ] finished. " + publicIP)
+
+	logger.Info("8. k8s[ " + k8sVersion + " ] finished. " + publicIP)
 	return nil
 }

@@ -15,7 +15,7 @@ import (
 func (a *AliyunEcs) getClient() *ecs.Client {
 	a.ecsOnce.Do(func() {
 		var err error
-		a.ecsHKCli, err = ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
+		a.ecsHKCli, err = ecs.NewClientWithAccessKey("", vars.AkID, vars.AkSK)
 		if err != nil {
 			_ = cutils.ProcessCloudError(err)
 		}
@@ -29,7 +29,7 @@ type AliyunEcs struct {
 }
 
 func (a *AliyunEcs) Healthy() error {
-	cli, err := ecs.NewClientWithAccessKey("", vars.AkId, vars.AkSK)
+	cli, err := ecs.NewClientWithAccessKey("", vars.AkID, vars.AkSK)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (a *AliyunEcs) Delete(instanceId []string, maxCount int) {
 	var response *ecs.DeleteInstancesResponse
 	var err error
 	for i := 0; i < maxCount; i++ {
-		logger.Error("递归删除ecs")
+		logger.Info("递归删除ecs")
 		response, err = client.DeleteInstances(request)
 		if err != nil {
 			_ = cutils.ProcessCloudError(err)

@@ -12,7 +12,7 @@ import (
 
 func (a *HuaweiEcs) getClient() *huawei.HClient {
 	a.ecsOnce.Do(func() {
-		a.ecsHKCli = huawei.NewClientWithAccessKey(vars.AkId, vars.AkSK)
+		a.ecsHKCli = huawei.NewClientWithAccessKey(vars.AkID, vars.AkSK)
 	})
 	return a.ecsHKCli
 }

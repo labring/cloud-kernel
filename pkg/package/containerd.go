@@ -15,6 +15,8 @@ import (
 var containerdShell = `yum install -y git conntrack && \
 git clone https://github.com/sealyun/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/containerd/* kube/ && \
+cp -rf runtime/rootfs/* kube/ && \
+cp -rf runtime/cni/%s/* kube/ && \
 %s && \
 %s && \
 %s && \
@@ -52,7 +54,7 @@ func NewContainerdK8s(publicIP string) _package {
 }
 func (d *containerdK8s) InitK8sServer() error {
 	err := d.ssh.CmdAsync(d.publicIP,
-		fmt.Sprintf(containerdShell, vars.KubeShell,
+		fmt.Sprintf(containerdShell, getCNIVersion(), vars.KubeShell,
 			vars.ContainerdShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
