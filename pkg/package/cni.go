@@ -17,10 +17,10 @@ package _package
 
 import "github.com/sealyun/cloud-kernel/pkg/vars"
 
-func getCNIVersion() string {
+func getCNIVersion() (string, string) {
 	k8s := vars.KubeVersion
 	if k8s != "" {
 
 	}
-	return "default"
+	return "default", "v3.8.2"
 }

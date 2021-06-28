@@ -8,6 +8,7 @@ import (
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
 	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"strings"
 	"time"
 )
 
@@ -34,6 +35,7 @@ cp /usr/sbin/conntrack ../bin/`
 var dockerSaveShell = `cd cloud-kernel &&  \
 docker save -o images.tar  ` + "`docker images|grep ago|awk '{print $1\":\"$2}'` " + `&& \
 mv images.tar kube/images/ && \
+cat kube/Metadata && \
 tar zcvf kube%s.tar.gz kube && mv kube%s.tar.gz /tmp/`
 
 type dockerK8s struct {
@@ -53,7 +55,8 @@ func NewDockerK8s(publicIP string) _package {
 	}
 }
 func (d *dockerK8s) InitK8sServer() error {
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, getCNIVersion(), vars.KubeShell, vars.DockerShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion))
+	calicoVersion, _ := getCNIVersion()
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, calicoVersion, vars.KubeShell, vars.DockerShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}
@@ -81,7 +84,19 @@ func (d *dockerK8s) WaitImages() error {
 }
 
 func (d *dockerK8s) SavePackage() error {
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, vars.KubeVersion, vars.KubeVersion))
+	//Metadata
+	writeMetadata := `cd cloud-kernel/kube && echo '%s' >  Metadata`
+	_, cniVersion := getCNIVersion()
+	md := &Metadata{
+		K8sVersion: strings.Join([]string{"v", vars.KubeVersion}, ""),
+		CniVersion: cniVersion,
+	}
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(writeMetadata, md.TemplateConvert()))
+	if err != nil {
+		return utils.ProcessError(err)
+	}
+	//docker save
+	err = d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerSaveShell, vars.KubeVersion, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)
 	}
