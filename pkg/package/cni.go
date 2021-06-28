@@ -15,12 +15,17 @@ limitations under the License.
 */
 package _package
 
-import "github.com/sealyun/cloud-kernel/pkg/vars"
+import (
+	"github.com/sealyun/cloud-kernel/pkg/utils"
+	"github.com/sealyun/cloud-kernel/pkg/vars"
+)
 
 func getCNIVersion() (string, string) {
 	k8s := vars.KubeVersion
 	if k8s != "" {
-
+		if utils.For119(k8s) {
+			return "31901", "v3.19.1"
+		}
 	}
-	return "default", "v3.8.2"
+	return "30802", "v3.8.2"
 }

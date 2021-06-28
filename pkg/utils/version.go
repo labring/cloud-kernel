@@ -36,3 +36,15 @@ func For120(version string) bool {
 	}
 
 }
+
+func For119(version string) bool {
+	newMajor, _ := GetMajorMinorInt(version)
+	// // kubernetes gt 1.20, use Containerd instead of docker
+	if newMajor >= 119 {
+		return true
+	} else {
+		//logger.Info("install version is: %s, Use kubeadm v1beta1 InitConfig, docker", version)
+		return false
+	}
+
+}
