@@ -58,4 +58,8 @@ eof
 fi
 # 已经安装了docker并且运行了, 就不去重启.
 docker info || systemctl restart docker.service
-
+docker load -i ../images/images.tar || true
+cgroupDriver=$(docker info|grep Cg)
+driver=${cgroupDriver##*: }
+echo "driver is ${driver}"
+export criDriver=${driver}

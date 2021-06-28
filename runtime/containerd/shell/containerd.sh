@@ -8,3 +8,11 @@ if ! [ -x /usr/local/bin/ctr ]; then
 fi
 # 已经安装了containerd并且运行了, 就不去重启.
 ctr version || systemctl restart containerd.service
+ctr -n=k8s.io image import ../images/images.tar || true
+if grep "SystemdCgroup = true"  /etc/containerd/config.toml &> /dev/nul; then
+  driver=systemd
+else
+  driver=cgroupfs
+fi
+echo "driver is ${driver}"
+export criDriver=${driver}
