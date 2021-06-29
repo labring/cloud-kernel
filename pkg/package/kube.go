@@ -3,11 +3,12 @@ package _package
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
-	"strings"
-	"time"
 )
 
 func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning bool) error {

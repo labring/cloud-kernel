@@ -2,13 +2,14 @@ package _package
 
 import (
 	"errors"
+	"time"
+
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"github.com/sealyun/cloud-kernel/pkg/retry"
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
 	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
-	"time"
 )
 
 type _package interface {
@@ -99,19 +100,17 @@ func Package(k8sVersion string) error {
 		logger.Info("6. k8s[ " + k8sVersion + " ] testing: " + publicIP)
 		if err = test(publicIP, k8sVersion); err != nil {
 			return utils.ProcessError(err)
-		} else {
-			if vars.Uploading {
-				logger.Info("7. k8s[ " + k8sVersion + " ] uploading: " + publicIP)
-				upload(publicIP, k8sVersion)
-			} else {
-				logger.Info("7. k8s[ " + k8sVersion + " ] skip uploading: " + publicIP)
-			}
 		}
 	} else {
 		logger.Info("6. k8s[ " + k8sVersion + " ] skip testing: " + publicIP)
-		logger.Info("7. k8s[ " + k8sVersion + " ] skip uploading: " + publicIP)
 	}
-
+	if vars.Uploading {
+		logger.Info("7. k8s[ " + k8sVersion + " ] uploading: " + publicIP)
+		upload(publicIP, k8sVersion)
+	} else {
+		logger.Info("7. k8s[ " + k8sVersion + " ] uploading test oss: " + publicIP)
+		uploadOSS(publicIP, k8sVersion)
+	}
 	logger.Info("8. k8s[ " + k8sVersion + " ] finished. " + publicIP)
 	return nil
 }

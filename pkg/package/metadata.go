@@ -17,8 +17,9 @@ package _package
 
 import (
 	"bytes"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
 	"text/template"
+
+	"github.com/sealyun/cloud-kernel/pkg/logger"
 )
 
 ///Metadata

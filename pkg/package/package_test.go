@@ -1,18 +1,21 @@
 package _package
 
 import (
-	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"testing"
+
+	"github.com/sealyun/cloud-kernel/pkg/vars"
 )
 
 func TestPackageDocker(t *testing.T) {
 	vars.Testing = false
+	vars.Uploading = false
 	vars.LoadAKSK()
 	Package("1.19.9")
 }
 
 func TestPackageContainerd(t *testing.T) {
 	vars.Testing = false
+	vars.Uploading = false
 	vars.LoadAKSK()
 	Package("1.20.0")
 }

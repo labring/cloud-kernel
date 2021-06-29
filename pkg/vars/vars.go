@@ -16,6 +16,7 @@ var (
 	SSHCmdDownload    string
 	SealosDownload    string
 	MarketCtlDownload string
+	OSSUtilDownload   string
 	DockerShell       string
 	ContainerdShell   string
 	CrictlShell       string
@@ -38,6 +39,7 @@ var (
 
 const (
 	EcsPassword          = "Fanux#123"
+	FmtOSSUtilDownload   = "https://gosspublic.alicdn.com/ossutil/1.7.3/ossutil%s"                               //https://gosspublic.alicdn.com/ossutil/1.7.3/ossutilarm64
 	FmtSSHCmdDownload    = "https://github.com/cuisongliu/sshcmd/releases/download/v%s/sshcmd%s"                 //sshcmd-arm64
 	FmtSealosDownload    = "https://sealyun.oss-accelerate.aliyuncs.com/v%s/sealos%s"                            //sealos-arm64
 	FmtMarketCtlDownload = "https://sealyun-market.oss-accelerate.aliyuncs.com/marketctl/v%s/linux_%s/marketctl" //linux_arm64
@@ -59,6 +61,10 @@ func platform() map[string]map[bool]string {
 		"sshcmd": {
 			false: "",
 			true:  "-arm64",
+		},
+		"oss": {
+			false: "64",
+			true:  "arm64",
 		},
 		"sealos": {
 			false: "",
@@ -127,6 +133,8 @@ func LoadVars() error {
 	KubeShell = fmt.Sprintf(FmtKubeShell, KubeVersion, platform()["kube"][IsArm64])
 	//sshcmd
 	SSHCmdDownload = fmt.Sprintf(FmtSSHCmdDownload, defaultSSHCmdVersion, platform()["sshcmd"][IsArm64])
+	//oss
+	OSSUtilDownload = fmt.Sprintf(FmtOSSUtilDownload, platform()["oss"][IsArm64])
 	//sealos
 	SealosDownload = fmt.Sprintf(FmtSealosDownload, defaultSealosVersion, platform()["sealos"][IsArm64])
 	//marketctl

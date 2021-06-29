@@ -2,6 +2,7 @@ package _package
 
 import (
 	"fmt"
+
 	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
 	"github.com/sealyun/cloud-kernel/pkg/utils"
 	"github.com/sealyun/cloud-kernel/pkg/vars"
@@ -32,4 +33,27 @@ func upload(publicIP, k8sVersion string) {
 		marketCMD = marketCMD + " --dd-token " + vars.DingDing
 	}
 	_ = s.CmdAsync(publicIP, marketCMD)
+}
+
+func uploadOSS(publicIP, k8sVersion string) {
+	s := sshutil.SSH{
+		User:     "root",
+		Password: vars.EcsPassword,
+		Timeout:  nil,
+	}
+	if err := downloadBin(s, publicIP, vars.OSSUtilDownload, "ossutil"); err != nil {
+		_ = utils.ProcessError(err)
+		return
+	}
+	writeOSSConfig := `cd cloud-kernel  && echo '%s' > oss-config && ossutil -c oss-config cp -f  /tmp/kube%s.tar.gz oss://sealyun-test/cloud_kernel/kube%s.tar.gz`
+	ossConfig := &OSSConfig{
+		KeyID:     vars.AkID,
+		KeySecret: vars.AkSK,
+	}
+	writeShell := fmt.Sprintf(writeOSSConfig, ossConfig.TemplateConvert(), k8sVersion, k8sVersion)
+	err := s.CmdAsync(publicIP, writeShell)
+	if err != nil {
+		_ = utils.ProcessError(err)
+		return
+	}
 }
