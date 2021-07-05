@@ -9,6 +9,8 @@ var (
 	DingDing          string
 	AkID              string
 	AkSK              string
+	OSSAkID           string
+	OSSAkSK           string
 	MarketCtlToken    string
 	IsArm64           bool
 	Uploading         bool
@@ -121,6 +123,12 @@ func loadEnv() {
 	}
 }
 func LoadAKSK() {
+	if v := os.Getenv("OSS_AKID"); v != "" {
+		OSSAkID = v
+	}
+	if v := os.Getenv("OSS_AKSK"); v != "" {
+		OSSAkSK = v
+	}
 	if v := os.Getenv("CLOUD_KERNEL_AKID"); v != "" {
 		AkID = v
 	}

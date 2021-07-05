@@ -47,8 +47,8 @@ func uploadOSS(publicIP, k8sVersion string) {
 	}
 	writeOSSConfig := `cd cloud-kernel  && echo '%s' > oss-config && ossutil -c oss-config cp -f  /tmp/kube%s.tar.gz oss://sealyun-test/cloud_kernel/kube%s.tar.gz`
 	ossConfig := &OSSConfig{
-		KeyID:     vars.AkID,
-		KeySecret: vars.AkSK,
+		KeyID:     vars.OSSAkID,
+		KeySecret: vars.OSSAkSK,
 	}
 	writeShell := fmt.Sprintf(writeOSSConfig, ossConfig.TemplateConvert(), k8sVersion, k8sVersion)
 	err := s.CmdAsync(publicIP, writeShell)
