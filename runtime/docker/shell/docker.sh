@@ -27,7 +27,11 @@ if ! command_exists docker; then
 		centos|rhel|ol|sles|kylin|neokylin)
 			cp ../conf/docker.service /usr/lib/systemd/system/docker.service
 		;;
-
+    alios)
+      ip link add name docker0 type bridge
+      ip addr add dev docker0 172.17.0.1/16
+    	cp ../conf/docker.service /usr/lib/systemd/system/docker.service
+    ;;
 		*)
 			echo "unknown system to use /lib/systemd/system/docker.service"
 			cp ../conf/docker.service /lib/systemd/system/docker.service
