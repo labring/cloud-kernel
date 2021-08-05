@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"github.com/sealyun/cloud-kernel/pkg/ecs"
 	"github.com/sealyun/cloud-kernel/pkg/github"
 	"github.com/sealyun/cloud-kernel/pkg/logger"
@@ -32,6 +33,11 @@ import (
 
 var gFetch []string
 
+type errorObject struct {
+	Version string `json:"version"`
+	Error   string `json:"error"`
+}
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run",
@@ -41,12 +47,22 @@ var runCmd = &cobra.Command{
 			logger.Warn("当月无需要更新版本")
 			os.Exit(0)
 		} else {
+			e := make([]errorObject, 0)
 			for _, v := range gFetch {
 				logger.Debug("当前更新版本: " + v)
 				if err := _package.Package(strings.ReplaceAll(v, "v", "")); err != nil {
 					logger.Error(err)
 					logger.Warn("更新版本发生错误,跳过当前版本: " + v)
+					e = append(e, errorObject{
+						Version: v,
+						Error:   err.Error(),
+					})
 				}
+			}
+			if len(e) != 0 {
+				s, _ := json.Marshal(e)
+				logger.Fatal("执行打包流程报错 %s", string(s))
+				os.Exit(0)
 			}
 		}
 	},
