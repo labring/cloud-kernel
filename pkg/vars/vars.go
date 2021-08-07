@@ -34,9 +34,9 @@ var (
 	defaultMarketCtlVersion  = "1.0.5" //v1.0.5
 	defaultSSHCmdVersion     = "1.5.5"
 	defaultNerdctlVersion    = "0.7.3"
-	defaultCriCtlVersion     = "1.20.0"
+	defaultCriCtlVersion     = "1.22.0"
 	defaultDockerVersion     = "19.03.12"
-	defaultContainerdVersion = "1.4.3"
+	defaultContainerdVersion = "1.5.5"
 )
 
 const (
@@ -47,10 +47,10 @@ const (
 	FmtMarketCtlDownload = "https://sealyun-market.oss-accelerate.aliyuncs.com/marketctl/v%s/linux_%s/marketctl" //linux_arm64
 	FmtDockerShell       = "wget https://download.docker.com/linux/static/stable/%s/docker-%s.tgz  " +           //aarch64
 		"-O docker.tgz && cp docker.tgz kube/docker/docker.tgz"
-	FmtContainerdShell = "wget https://sealyun.oss-accelerate.aliyuncs.com/tools/cri-containerd-cni-%s-linux-%s.tar.gz " +
+	FmtContainerdShell = "wget https://github.com/sealyun-market/containerd/releases/download/v%s/cri-containerd-cni-%s-linux-%s.tar.gz " +
 		"-O cri-containerd-cni-linux.tar.gz && " +
 		"cp cri-containerd-cni-linux.tar.gz kube/containerd/cri-containerd-cni-linux.tar.gz"
-	FmtCrictlShell = "wget https://sealyun.oss-accelerate.aliyuncs.com/tools/crictl-v%s-linux-%s.tar.gz " +
+	FmtCrictlShell = "wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v%s/crictl-v%s-linux-%s.tar.gz " +
 		"-O  crictl.tar.gz &&  tar xf crictl.tar.gz && cp crictl kube/bin/"
 	FmtKubeShell = "wget https://dl.k8s.io/v%s/kubernetes-server-linux-%s.tar.gz -O  kubernetes-server.tar.gz && " + //arm64
 		"tar zxvf kubernetes-server.tar.gz"
@@ -148,9 +148,9 @@ func LoadVars() error {
 	//marketctl
 	MarketCtlDownload = fmt.Sprintf(FmtMarketCtlDownload, defaultMarketCtlVersion, platform()["marketctl"][IsArm64])
 	//containerd
-	ContainerdShell = fmt.Sprintf(FmtContainerdShell, defaultContainerdVersion, platform()["containerd"][IsArm64])
+	ContainerdShell = fmt.Sprintf(FmtContainerdShell, defaultContainerdVersion, defaultContainerdVersion, platform()["containerd"][IsArm64])
 	DockerShell = fmt.Sprintf(FmtDockerShell, platform()["docker"][IsArm64], defaultDockerVersion)
-	CrictlShell = fmt.Sprintf(FmtCrictlShell, defaultCriCtlVersion, platform()["crictl"][IsArm64])
+	CrictlShell = fmt.Sprintf(FmtCrictlShell, defaultCriCtlVersion, defaultCriCtlVersion, platform()["crictl"][IsArm64])
 	NerdctlShell = fmt.Sprintf(FmtNerdctlShell, defaultNerdctlVersion, defaultNerdctlVersion, platform()["nerdctl"][IsArm64])
 
 	if IsArm64 {
