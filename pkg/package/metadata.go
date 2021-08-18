@@ -17,6 +17,7 @@ package _package
 
 import (
 	"bytes"
+	"github.com/sealyun/cloud-kernel/pkg/vars"
 	"text/template"
 
 	"github.com/sealyun/cloud-kernel/pkg/logger"
@@ -26,7 +27,8 @@ import (
 const metadataTemplate = `{
   "k8sVersion": "{{.k8sVersion}}",
   "cniVersion": "{{.cniVersion}}",
-  "cniName": "{{.cniName}}"
+  "cniName": "{{.cniName}}",
+  "arch": "{{.Arch}}"
 }
 `
 
@@ -44,10 +46,19 @@ func (m *Metadata) TemplateConvert() string {
 	if m.CniName == "" {
 		m.CniName = "calico"
 	}
+	vp := vars.IsArm64
+	var arch string
+	if vp {
+		arch = "arm64"
+	} else {
+		arch = "amd64"
+	}
+
 	p := map[string]interface{}{
 		"k8sVersion": m.K8sVersion,
 		"cniVersion": m.CniVersion,
 		"cniName":    m.CniName,
+		"Arch":       arch,
 	}
 
 	data, err := templateFromContent(m.Template(), p)

@@ -98,6 +98,7 @@ func (d *containerdK8s) SavePackage() error {
 	if err != nil {
 		return utils.ProcessError(err)
 	}
+	//os.Exit(0)
 	err = d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(containerdSaveShell, vars.KubeVersion, vars.KubeVersion))
 	if err != nil {
 		return utils.ProcessError(err)

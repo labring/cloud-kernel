@@ -30,13 +30,14 @@ var (
 	DefaultClass      = "cloud_kernel" //cloud_kernel
 	DefaultProduct    = "kubernetes"   //kubernetes
 
-	defaultSealosVersion     = "3.3.9-rc.1"
-	defaultMarketCtlVersion  = "1.0.5" //v1.0.5
-	defaultSSHCmdVersion     = "1.5.5"
-	defaultNerdctlVersion    = "0.7.3"
-	defaultCriCtlVersion     = "1.22.0"
-	defaultDockerVersion     = "19.03.12"
-	defaultContainerdVersion = "1.5.5"
+	defaultSealosVersion        = "3.3.9-rc.1"
+	defaultMarketCtlVersion     = "1.0.5" //v1.0.5
+	defaultSSHCmdVersion        = "1.5.5"
+	defaultNerdctlVersion       = "0.7.3"
+	defaultCriCtlVersion        = "1.22.0"
+	defaultDockerVersion        = "19.03.12"
+	defaultContainerdVersion    = "1.5.5"
+	defaultContainerdArmVersion = "1.4.4"
 )
 
 const (
@@ -148,7 +149,13 @@ func LoadVars() error {
 	//marketctl
 	MarketCtlDownload = fmt.Sprintf(FmtMarketCtlDownload, defaultMarketCtlVersion, platform()["marketctl"][IsArm64])
 	//containerd
-	ContainerdShell = fmt.Sprintf(FmtContainerdShell, defaultContainerdVersion, defaultContainerdVersion, platform()["containerd"][IsArm64])
+	var ContainerdVersion string
+	if IsArm64 {
+		ContainerdVersion = defaultContainerdArmVersion
+	} else {
+		ContainerdVersion = defaultContainerdVersion
+	}
+	ContainerdShell = fmt.Sprintf(FmtContainerdShell, ContainerdVersion, ContainerdVersion, platform()["containerd"][IsArm64])
 	DockerShell = fmt.Sprintf(FmtDockerShell, platform()["docker"][IsArm64], defaultDockerVersion)
 	CrictlShell = fmt.Sprintf(FmtCrictlShell, defaultCriCtlVersion, defaultCriCtlVersion, platform()["crictl"][IsArm64])
 	NerdctlShell = fmt.Sprintf(FmtNerdctlShell, defaultNerdctlVersion, defaultNerdctlVersion, platform()["nerdctl"][IsArm64])
