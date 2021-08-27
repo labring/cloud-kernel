@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install containerd
 chmod a+x containerd.sh
-sh containerd.sh
+bash containerd.sh
 
 
 # 修改kubelet
@@ -12,4 +12,4 @@ Environment="KUBELET_EXTRA_ARGS=--container-runtime=remote --cgroup-driver=${cri
 eof
 
 chmod a+x init-kube.sh
-sh init-kube.sh
+bash init-kube.sh

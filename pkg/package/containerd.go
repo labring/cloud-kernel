@@ -27,9 +27,9 @@ cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
 sed s/k8s_version/%s/g -i kube/conf/kubeadm.yaml && \
-cd kube/shell && chmod a+x containerd.sh && sh containerd.sh && \
+cd kube/shell && chmod a+x containerd.sh && bash containerd.sh && \
 systemctl restart containerd && \
-sh init.sh && sh master.sh && \
+bash init.sh && bash master.sh && \
 ctr -n=k8s.io images pull docker.io/fanux/lvscare:latest && \
 cp /usr/sbin/conntrack ../bin/ && \
 cp /usr/lib64/libseccomp* ../lib64/`
