@@ -65,4 +65,5 @@ docker info || systemctl restart docker.service
 [ -f ../images/images.tar ] && docker load -i ../images/images.tar
 cgroupDriver=$(docker info -f "{{.CgroupDriver}}")
 echo "driver is ${driver}"
-export criDriver=${driver}
+sed s/ccgroupDriver/${driver}/g -i ../conf/kubeadm.yaml
+#export criDriver=${driver}

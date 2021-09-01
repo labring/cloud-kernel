@@ -16,3 +16,4 @@ else
 fi
 echo "driver is ${driver}"
 export criDriver=${driver}
+sed s/ccgroupDriver/${driver}/g -i ../conf/kubeadm.yaml
