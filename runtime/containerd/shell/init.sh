@@ -11,5 +11,9 @@ cat > /etc/systemd/system/kubelet.service.d/containerd.conf << eof
 Environment="KUBELET_EXTRA_ARGS=--container-runtime=remote --cgroup-driver=${criDriver} --runtime-request-timeout=15m --container-runtime-endpoint=unix:///run/containerd/containerd.sock --image-service-endpoint=unix:///run/containerd/containerd.sock"
 eof
 
+cat /etc/systemd/system/kubelet.service.d/containerd.conf
+
 chmod a+x init-kube.sh
 sh init-kube.sh
+
+cat /var/lib/kubelet/config.yaml
