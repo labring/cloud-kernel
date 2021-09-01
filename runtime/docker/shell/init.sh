@@ -2,7 +2,7 @@
 # Install docker
 chmod a+x docker.sh
 #./docker.sh  /var/docker/lib  127.0.0.1
-sh docker.sh
+bash docker.sh
 chmod a+x init-kube.sh
 
-sh init-kube.sh
+bash init-kube.sh

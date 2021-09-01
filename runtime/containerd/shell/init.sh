@@ -1,7 +1,7 @@
 #!/bin/bash
 # Install containerd
 chmod a+x containerd.sh
-sh containerd.sh
+bash containerd.sh
 
 
 # 修改kubelet
@@ -14,6 +14,6 @@ eof
 cat /etc/systemd/system/kubelet.service.d/containerd.conf
 
 chmod a+x init-kube.sh
-sh init-kube.sh
+bash init-kube.sh
 
 cat /var/lib/kubelet/config.yaml

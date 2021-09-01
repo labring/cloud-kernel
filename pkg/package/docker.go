@@ -27,9 +27,9 @@ cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
 sed s/k8s_version/%s/g -i kube/conf/kubeadm.yaml && \
-cd kube/shell && chmod a+x docker.sh && sh docker.sh && \
+cd kube/shell && chmod a+x docker.sh && bash docker.sh && \
 rm -rf /etc/docker/daemon.json && systemctl restart docker && \
-sh init.sh && sh master.sh && \
+bash init.sh && bash master.sh && \
 docker pull fanux/lvscare &&  \
 cp /usr/sbin/conntrack ../bin/`
 
