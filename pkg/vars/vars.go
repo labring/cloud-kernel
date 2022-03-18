@@ -44,7 +44,7 @@ const (
 	EcsPassword          = "Fanux#123"
 	FmtOSSUtilDownload   = "https://gosspublic.alicdn.com/ossutil/1.7.3/ossutil%s"                               //https://gosspublic.alicdn.com/ossutil/1.7.3/ossutilarm64
 	FmtSSHCmdDownload    = "https://github.com/cuisongliu/sshcmd/releases/download/v%s/sshcmd%s"                 //sshcmd-arm64
-	FmtSealosDownload    = "https://sealyun.oss-accelerate.aliyuncs.com/v%s/sealos%s"                            //sealos-arm64
+	FmtSealosDownload    = "https://sealyun-home.oss-accelerate.aliyuncs.com/sealos/v%s/sealos%s"                //sealos-arm64
 	FmtMarketCtlDownload = "https://sealyun-market.oss-accelerate.aliyuncs.com/marketctl/v%s/linux_%s/marketctl" //linux_arm64
 	FmtDockerShell       = "wget https://download.docker.com/linux/static/stable/%s/docker-%s.tgz  " +           //aarch64
 		"-O docker.tgz && cp docker.tgz kube/docker/docker.tgz"
