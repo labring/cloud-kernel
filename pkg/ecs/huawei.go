@@ -3,10 +3,10 @@ package ecs
 import (
 	"errors"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2/model"
-	"github.com/sealyun/cloud-kernel/pkg/ecs/huawei"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
-	cutils "github.com/sealyun/cloud-kernel/pkg/utils"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/ecs/huawei"
+	"github.com/labring/cloud-kernel/pkg/logger"
+	cutils "github.com/labring/cloud-kernel/pkg/utils"
+	"github.com/labring/cloud-kernel/pkg/vars"
 	"sync"
 )
 

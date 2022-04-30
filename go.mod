@@ -1,4 +1,4 @@
-module github.com/sealyun/cloud-kernel
+module github.com/labring/cloud-kernel
 
 go 1.13
 

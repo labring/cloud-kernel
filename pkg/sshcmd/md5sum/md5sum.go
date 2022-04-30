@@ -2,7 +2,7 @@ package md5sum
 
 import (
 	"fmt"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/logger"
 	"os/exec"
 	"strings"
 )

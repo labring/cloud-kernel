@@ -2,7 +2,7 @@ package sshutil
 
 import (
 	"bufio"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/logger"
 	"io"
 	"strings"
 )

@@ -5,9 +5,9 @@ import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/utils"
 	"github.com/aliyun/alibaba-cloud-sdk-go/services/ecs"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
-	cutils "github.com/sealyun/cloud-kernel/pkg/utils"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/logger"
+	cutils "github.com/labring/cloud-kernel/pkg/utils"
+	"github.com/labring/cloud-kernel/pkg/vars"
 	"strconv"
 	"sync"
 )

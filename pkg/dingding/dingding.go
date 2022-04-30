@@ -2,9 +2,9 @@ package dingding
 
 import (
 	"bytes"
-	"github.com/sealyun/cloud-kernel/pkg/httplib"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/httplib"
+	"github.com/labring/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/vars"
 	"io/ioutil"
 	"log"
 	"text/template"

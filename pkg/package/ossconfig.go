@@ -15,7 +15,7 @@ limitations under the License.
 */
 package _package
 
-import "github.com/sealyun/cloud-kernel/pkg/logger"
+import "github.com/labring/cloud-kernel/pkg/logger"
 
 ///oss
 const ossTemplate = `[Credentials]

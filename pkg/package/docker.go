@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sealyun/cloud-kernel/pkg/logger"
-	"github.com/sealyun/cloud-kernel/pkg/retry"
-	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
-	"github.com/sealyun/cloud-kernel/pkg/utils"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/retry"
+	"github.com/labring/cloud-kernel/pkg/sshcmd/sshutil"
+	"github.com/labring/cloud-kernel/pkg/utils"
+	"github.com/labring/cloud-kernel/pkg/vars"
 )
 
 //k8s dockerShell k8s
 var dockerShell = `yum install -y git conntrack && \
-git clone https://github.com/sealyun/cloud-kernel && \
+git clone https://github.com/labring/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/docker/* kube/ && \
 cp -rf runtime/rootfs/* kube/ && \
 cp -rf runtime/cni/%s/* kube/ && \

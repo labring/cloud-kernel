@@ -2,7 +2,7 @@ package marketctl
 
 import (
 	"fmt"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/vars"
 )
 
 const defaultDomain = "https://www.sealyun.com"

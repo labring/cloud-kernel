@@ -17,10 +17,10 @@ package _package
 
 import (
 	"bytes"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/vars"
 	"text/template"
 
-	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/logger"
 )
 
 ///Metadata

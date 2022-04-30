@@ -1,6 +1,6 @@
 package ecs
 
-import "github.com/sealyun/cloud-kernel/pkg/vars"
+import "github.com/labring/cloud-kernel/pkg/vars"
 
 type cloud interface {
 	New(amount int, dryRun bool, bandwidthOut bool) []string

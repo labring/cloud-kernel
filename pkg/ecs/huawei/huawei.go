@@ -6,7 +6,7 @@ import (
 	ecs "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2"
 	"github.com/huaweicloud/huaweicloud-sdk-go-v3/services/ecs/v2/model"
 	eip "github.com/huaweicloud/huaweicloud-sdk-go-v3/services/eip/v2"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/vars"
 )
 
 const (

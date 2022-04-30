@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/logger"
 	"os"
 	"os/exec"
 )

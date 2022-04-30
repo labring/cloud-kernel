@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/errors"
-	"github.com/sealyun/cloud-kernel/pkg/dingding"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/dingding"
+	"github.com/labring/cloud-kernel/pkg/logger"
 )
 
 func ProcessError(err error) error {

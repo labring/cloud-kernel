@@ -16,8 +16,8 @@ limitations under the License.
 package _package
 
 import (
-	"github.com/sealyun/cloud-kernel/pkg/utils"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/utils"
+	"github.com/labring/cloud-kernel/pkg/vars"
 )
 
 func getCNIVersion() (string, string) {

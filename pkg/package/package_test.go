@@ -3,7 +3,7 @@ package _package
 import (
 	"testing"
 
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/vars"
 )
 
 //go test -v -timeout 30000s -test.run TestPackageDocker

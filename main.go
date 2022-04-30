@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/sealyun/cloud-kernel/cmd"
+import "github.com/labring/cloud-kernel/cmd"
 
 func main() {
 	cmd.Execute()

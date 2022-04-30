@@ -2,7 +2,7 @@ package sshutil
 
 import (
 	"fmt"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/logger"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"os"

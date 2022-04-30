@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sealyun/cloud-kernel/pkg/logger"
-	"github.com/sealyun/cloud-kernel/pkg/retry"
-	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
+	"github.com/labring/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/retry"
+	"github.com/labring/cloud-kernel/pkg/sshcmd/sshutil"
 )
 
 func checkKubeStatus(step string, publicIP string, s sshutil.SSH, allRunning bool) error {

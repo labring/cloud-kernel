@@ -4,12 +4,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/sealyun/cloud-kernel/pkg/ecs"
-	"github.com/sealyun/cloud-kernel/pkg/logger"
-	"github.com/sealyun/cloud-kernel/pkg/retry"
-	"github.com/sealyun/cloud-kernel/pkg/sshcmd/sshutil"
-	"github.com/sealyun/cloud-kernel/pkg/utils"
-	"github.com/sealyun/cloud-kernel/pkg/vars"
+	"github.com/labring/cloud-kernel/pkg/ecs"
+	"github.com/labring/cloud-kernel/pkg/logger"
+	"github.com/labring/cloud-kernel/pkg/retry"
+	"github.com/labring/cloud-kernel/pkg/sshcmd/sshutil"
+	"github.com/labring/cloud-kernel/pkg/utils"
+	"github.com/labring/cloud-kernel/pkg/vars"
 )
 
 type _package interface {
