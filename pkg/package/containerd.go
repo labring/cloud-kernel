@@ -14,7 +14,7 @@ import (
 )
 
 //k8s containerd containerd k8s
-var containerdShell = `apt-get update -y && apt-get install -y git conntrack && \
+var containerdShell = `apt-get update -y && apt-get install -y git && \
 git clone https://github.com/labring/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/containerd/* kube/ && \
 cp -rf runtime/rootfs/* kube/ && \
@@ -32,8 +32,9 @@ cd kube/shell && chmod a+x containerd.sh && bash containerd.sh && \
 systemctl restart containerd && \
 bash init.sh && bash master.sh && \
 ctr -n=k8s.io images pull docker.io/fanux/lvscare:latest && \
-cp /usr/sbin/conntrack ../bin/ && \
-cp /usr/lib64/libseccomp* ../lib64/`
+wget %s --no-check-certificate -O library.tar.gz && \
+tar xf library.tar.gz && rm -rf library.tar.gz && cp -rf library/bin/*  ../bin/ && \
+cp -rf library/lib64/  ../lib64/ && rm -rf library`
 
 var containerdSaveShell = `cd cloud-kernel &&  \
 ctr -n=k8s.io  images export images.tar $(ctr -n=k8s.io image ls  | awk '{print $1}' | grep -v sha256  | grep -v REF) && \
@@ -60,7 +61,7 @@ func (d *containerdK8s) InitK8sServer() error {
 	calicoVersion, _ := getCNIVersion()
 	err := d.ssh.CmdAsync(d.publicIP,
 		fmt.Sprintf(containerdShell, calicoVersion, vars.KubeShell,
-			vars.ContainerdShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion, getKubeadmAPI(vars.KubeVersion)))
+			vars.ContainerdShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion, getKubeadmAPI(vars.KubeVersion), vars.LibraryURL))
 	if err != nil {
 		return utils.ProcessError(err)
 	}

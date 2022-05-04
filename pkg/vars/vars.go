@@ -24,6 +24,7 @@ var (
 	CrictlShell       string
 	KubeShell         string
 	NerdctlShell      string
+	LibraryURL        string
 	KubeVersion       string
 	DefaultPrice      float64
 	DefaultZeroPrice  float64
@@ -57,6 +58,7 @@ const (
 		"tar zxvf kubernetes-server.tar.gz"
 	FmtNerdctlShell = "wget https://github.com/containerd/nerdctl/releases/download/v%s/nerdctl-%s-linux-%s.tar.gz " +
 		"-O  nerdctl.tar.gz &&  tar xf nerdctl.tar.gz && cp nerdctl kube/bin/ && cp containerd-rootless* kube/bin/"
+	FmtLibraryURL = "https://sealyun-home.oss-accelerate.aliyuncs.com/images/library-2.5-%s-%s.tar.gz"
 )
 
 func platform() map[string]map[bool]string {
@@ -94,6 +96,10 @@ func platform() map[string]map[bool]string {
 			true:  "arm64",
 		},
 		"kube": {
+			false: "amd64",
+			true:  "arm64",
+		},
+		"library": {
 			false: "amd64",
 			true:  "arm64",
 		},
@@ -159,6 +165,7 @@ func LoadVars() error {
 	DockerShell = fmt.Sprintf(FmtDockerShell, platform()["docker"][IsArm64], defaultDockerVersion)
 	CrictlShell = fmt.Sprintf(FmtCrictlShell, defaultCriCtlVersion, defaultCriCtlVersion, platform()["crictl"][IsArm64])
 	NerdctlShell = fmt.Sprintf(FmtNerdctlShell, defaultNerdctlVersion, defaultNerdctlVersion, platform()["nerdctl"][IsArm64])
+	LibraryURL = fmt.Sprintf(FmtLibraryURL, "linux", platform()["library"][IsArm64])
 
 	if IsArm64 {
 		DefaultProduct = "kubernetes-arm64"
