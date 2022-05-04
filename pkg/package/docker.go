@@ -14,7 +14,7 @@ import (
 )
 
 //k8s dockerShell k8s
-var dockerShell = `yum install -y git conntrack && \
+var dockerShell = `apt-get install -y git conntrack && \
 git clone https://github.com/labring/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/docker/* kube/ && \
 cp -rf runtime/rootfs/* kube/ && \
