@@ -33,11 +33,11 @@ var (
 	defaultSealosVersion        = "3.3.9-rc.1"
 	defaultMarketCtlVersion     = "1.0.5" //v1.0.5
 	defaultSSHCmdVersion        = "1.5.5"
-	defaultNerdctlVersion       = "0.7.3"
+	defaultNerdctlVersion       = "0.19.0"
 	defaultCriCtlVersion        = "1.22.0"
 	defaultDockerVersion        = "19.03.12"
-	defaultContainerdVersion    = "1.5.5"
-	defaultContainerdArmVersion = "1.4.4"
+	defaultContainerdVersion    = "1.6.4"
+	defaultContainerdArmVersion = "1.6.4"
 )
 
 const (
@@ -48,7 +48,7 @@ const (
 	FmtMarketCtlDownload = "https://sealyun-market.oss-accelerate.aliyuncs.com/marketctl/v%s/linux_%s/marketctl" //linux_arm64
 	FmtDockerShell       = "wget https://download.docker.com/linux/static/stable/%s/docker-%s.tgz  " +           //aarch64
 		"-O docker.tgz && cp docker.tgz kube/docker/docker.tgz"
-	FmtContainerdShell = "wget https://github.com/sealyun-market/containerd/releases/download/v%s/cri-containerd-cni-%s-linux-%s.tar.gz " +
+	FmtContainerdShell = "wget https://github.com/containerd/containerd/releases/download/v%s/cri-containerd-cni-%s-linux-%s.tar.gz " +
 		"-O cri-containerd-cni-linux.tar.gz && " +
 		"cp cri-containerd-cni-linux.tar.gz kube/containerd/cri-containerd-cni-linux.tar.gz"
 	FmtCrictlShell = "wget https://github.com/kubernetes-sigs/cri-tools/releases/download/v%s/crictl-v%s-linux-%s.tar.gz " +
