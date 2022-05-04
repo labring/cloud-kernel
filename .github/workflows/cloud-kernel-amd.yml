@@ -1,0 +1,31 @@
+name: Build Amd64 Offline Image
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron:  '0 22 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Install cloud-kernel and run
+        env:
+          ak: ${{ secrets.AK }}
+          sk: ${{ secrets.SK }}
+          token: ${{ secrets.MARKETCTL }}
+          dd: ${{ secrets.DD }}
+          MARKET_CTL_VERSION: ${{ secrets.MARKETCTL_VERSION }}
+          SSH_CMD_VERSION: ""
+          NERD_CTL_VERSION: ""
+          CRI_CTL_VERSION: ""
+          DOCKER_VERSION: ""
+          CONTAINERD_VERSION: ""
+        run: |
+          CLOUD_URL=$(curl -LsSf https://api.github.com/repos/labring/cloud-kernel/releases/latest | jq -r ".assets[0].browser_download_url")
+          export SEALOS_VERSION=$(curl -LsSf https://api.github.com/repos/labring/sealos/releases/latest | jq -r ".tag_name" | tr -d 'v')
+          wget -c $CLOUD_URL -O cloud-kernel && chmod +x cloud-kernel
+          export PATH=${PATH}:$(pwd)
+          echo "sealos 版本 v$SEALOS_VERSION"
+          cloud-kernel run --dingding $dd --ak $ak --sk $sk --marketctl $token
