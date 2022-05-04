@@ -46,7 +46,7 @@ func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
 	client := a.getClient()
 	// 创建请求并设置参数
 	hk := ecs.CreateRunInstancesRequest()
-	hk.ImageId = "centos_7_04_64_20G_alibase_201701015.vhd"
+	hk.ImageId = "ubuntu_18_04_x64_20G_alibase_20220322.vhd"
 	hk.InstanceType = "ecs.c5.xlarge"
 	hk.InternetChargeType = "PayByTraffic"
 	hk.InternetMaxBandwidthIn = "100"

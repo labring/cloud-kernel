@@ -27,6 +27,7 @@ cp  kubernetes/server/bin/kubectl kube/bin/ && \
 cp  kubernetes/server/bin/kubelet kube/bin/ && \
 cp  kubernetes/server/bin/kubeadm kube/bin/ && \
 sed s/k8s_version/%s/g -i kube/conf/kubeadm.yaml && \
+sed s#kubeadm.k8s.io/v1beta1#%s#g -i kube/conf/kubeadm.yaml && \
 cd kube/shell && chmod a+x docker.sh && bash docker.sh && \
 rm -rf /etc/docker/daemon.json && systemctl restart docker && \
 bash init.sh && bash master.sh && \
@@ -57,7 +58,7 @@ func NewDockerK8s(publicIP string) _package {
 }
 func (d *dockerK8s) InitK8sServer() error {
 	calicoVersion, _ := getCNIVersion()
-	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, calicoVersion, vars.KubeShell, vars.DockerShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion))
+	err := d.ssh.CmdAsync(d.publicIP, fmt.Sprintf(dockerShell, calicoVersion, vars.KubeShell, vars.DockerShell, vars.CrictlShell, vars.NerdctlShell, vars.KubeVersion, getKubeadmAPI(vars.KubeVersion)))
 	if err != nil {
 		return utils.ProcessError(err)
 	}

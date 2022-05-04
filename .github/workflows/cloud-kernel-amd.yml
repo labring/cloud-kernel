@@ -1,7 +1,8 @@
 name: Build Amd64 Offline Image
 on:
   push:
-    branches: [ main ]
+    branches-ignore:
+      - '**'
   schedule:
     - cron:  '0 22 * * *'
 
