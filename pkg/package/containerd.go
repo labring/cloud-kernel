@@ -14,7 +14,7 @@ import (
 )
 
 //k8s containerd containerd k8s
-var containerdShell = `apt-get install -y git conntrack && \
+var containerdShell = `apt-get update -y && apt-get install -y git conntrack && \
 git clone https://github.com/labring/cloud-kernel && \
 cd cloud-kernel && mkdir -p kube && cp -rf runtime/containerd/* kube/ && \
 cp -rf runtime/rootfs/* kube/ && \
