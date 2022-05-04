@@ -98,7 +98,7 @@ func (h *HClient) RunInstances(amount int, dryRun bool, bandwidthOut bool) ([]st
 		AvailabilityZone: h.Zone,
 		FlavorRef:        "kc1.large.2",
 		//ImageRef:         "04678140-fcc1-465d-ba36-3a2b19d155f9",
-		ImageRef:     "b0c2b3e0-6a1f-499b-9df0-4d1b2e374a54",
+		ImageRef:     "ad091b52-742f-469e-8f3c-fd81cadf0743",
 		Name:         "sealos",
 		Nics:         listPostPaidServerNicNicsPostPaidServer,
 		Publicip:     publicipPostPaidServer,
