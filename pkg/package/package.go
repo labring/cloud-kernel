@@ -19,6 +19,10 @@ type _package interface {
 }
 
 func Package(k8sVersion string) error {
+	if utils.For124(k8sVersion) {
+		logger.Warn("sealos 3.0 not support version gt 1.24")
+		return nil
+	}
 	vars.KubeVersion = k8sVersion
 	err := vars.LoadVars()
 	if err != nil {
