@@ -1,8 +1,8 @@
 name: Build Arm64 Offline Image
 on:
   push:
-    branches-ignore:
-      - '**'
+    branches:
+      - '*'
   schedule:
     - cron:  '0 22 * * *'
 
