@@ -10,6 +10,7 @@ import (
 	"github.com/labring/cloud-kernel/pkg/vars"
 	"strconv"
 	"sync"
+	"time"
 )
 
 func (a *AliyunEcs) getClient() *ecs.Client {
@@ -57,6 +58,7 @@ func (a *AliyunEcs) New(amount int, dryRun bool, bandwidthOut bool) []string {
 	hk.SecurityGroupId = "sg-j6cb45dolegxcb32b47w"
 	hk.VSwitchId = "vsw-j6cvaap9o5a7et8uumqyx"
 	hk.ZoneId = "cn-hongkong-c"
+	hk.AutoReleaseTime = getNewTime()
 	hk.Password = vars.EcsPassword
 	hk.Amount = requests.Integer(strconv.Itoa(amount))
 	hk.ClientToken = utils.GetUUID()
@@ -117,4 +119,9 @@ func (a *AliyunEcs) Describe(instanceId string) (*CloudInstanceResponse, error) 
 		iResponse.PublicIP = attr.PublicIpAddress.IpAddress[0]
 	}
 	return iResponse, nil
+}
+
+func getNewTime() string {
+	t := time.Now().Add(5 * time.Hour)
+	return t.Format("2006-01-02T15:04:05Z")
 }
